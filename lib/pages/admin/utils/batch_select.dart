@@ -89,10 +89,15 @@ class BatchSelectBox extends StatelessWidget {
                   final batches = snapshot.data!;
 
                   return SingleChildScrollView(
-                    child: Wrap(
-                      runSpacing: 15,
-                      spacing: 15,
-                      children: batches.map((batch) => BatchTile(batch: batch)).toList(),
+                    child: Container(
+                      width: double.maxFinite,
+                      child: Center(
+                        child: Wrap(
+                          runSpacing: 15,
+                          spacing: 15,
+                          children: batches.map((batch) => BatchTile(batch: batch)).toList(),
+                        ),
+                      ),
                     ),
                   );
                 },
