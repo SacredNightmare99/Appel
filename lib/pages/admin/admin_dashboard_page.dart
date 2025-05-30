@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_project/pages/admin/utils/attendance_calendar.dart';
+import 'package:the_project/pages/admin/utils/buttons.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   AdminDashboardPage({super.key});
@@ -25,10 +26,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           child: Center(
             child: Wrap(
               spacing: 30,
-              direction: Axis.horizontal,
-              alignment: WrapAlignment.start,
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.center,
               children: [
                 AttendanceCalendar(),
+                NavigateButton(route: 'admin/add', text: 'Add')
               ],
             ),
           ),
