@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:the_project/pages/admin/data/batch.dart';
 import 'package:the_project/pages/admin/utils/buttons.dart';
 import 'package:the_project/pages/admin/utils/student_tile.dart';
+import 'package:the_project/services/firestore_service.dart';
 
 class BatchTile extends StatefulWidget {
 
-  bool marked;
-  Batch batch;
+  
+  final Batch batch;
+  final DateTime selectedDate;
+  
 
-  BatchTile({super.key, this.marked = false, required this.batch});
+  BatchTile({super.key, required this.batch, required this.selectedDate});
 
   @override
   State<BatchTile> createState() => _BatchTileState();
@@ -18,26 +21,29 @@ class BatchTile extends StatefulWidget {
 
 class _BatchTileState extends State<BatchTile> {
 
-  late DateTime selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedDate = DateTime.now();
-  }
+  final FirestoreService firestoreService = FirestoreService();
 
   void resetAttendance() {
     for (var student in widget.batch.students) {
-      student.attendance[selectedDate.toIso8601String()] = false;
+      student.present = false;
     }
     setState(() {});
   }
 
   void markAllPresent() {
     for (var student in widget.batch.students) {
-      student.attendance[selectedDate.toIso8601String()] = true;
+      student.present = true;
     }
     setState(() {});
+  }
+
+  void submitAttendance() async {
+    
+    await firestoreService.saveAttendanceForBatch([widget.batch], widget.selectedDate);
+
+    setState(() {
+      widget.batch.marked = true;
+    });
   }
 
   @override
@@ -55,14 +61,14 @@ class _BatchTileState extends State<BatchTile> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              IconButton(onPressed: markAllPresent, icon: Icon(Icons.check)),
+              IconButton(onPressed: widget.batch.marked? null : markAllPresent, icon: Icon(Icons.check, color: widget.batch.marked? null : Colors.green,)),
               Column(
                 children: [
                   Text(widget.batch.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   Text(widget.batch.timing, style: TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
-              IconButton(onPressed:resetAttendance, icon: Icon(Icons.close))
+              IconButton(onPressed: widget.batch.marked? null : resetAttendance, icon: Icon(Icons.close, color: widget.batch.marked? null : Colors.red,))
             ],
           ),
           Divider(),
@@ -73,24 +79,28 @@ class _BatchTileState extends State<BatchTile> {
               itemCount: widget.batch.students.length,
               itemBuilder: (context, index) {
                 final student = widget.batch.students[index];
-                bool isPresent = student.attendance[selectedDate.toIso8601String()] ?? false;
+                bool isPresent = student.present;
 
                 return StudentTile(
+                  marked: widget.batch.marked,
                   student: student,
                   isPresent: isPresent,
-                  onToggle: () {
+                  onToggle: widget.batch.marked
+                    ? null
+                    : () => {
                     setState(() {
-                      student.attendance[selectedDate.toIso8601String()] = !isPresent;
-                    });
-                  }
+                      student.present = !isPresent;
+                    })
+                  },
                 );
               },
             )
           ),
           Divider(),
 
+          // Submit Button
           SubmitButton(
-            onPressed: () {},
+            onPressed: widget.batch.marked? null : submitAttendance,
           )
         ],
       ),

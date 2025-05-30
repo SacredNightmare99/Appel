@@ -7,9 +7,10 @@ import 'package:the_project/pages/admin/utils/buttons.dart';
 class StudentTile extends StatelessWidget {
   final Student student;
   final bool isPresent;
-  final VoidCallback onToggle;
+  final VoidCallback? onToggle;
+  final bool marked;
 
-  StudentTile({super.key, required this.student, required this.isPresent, required this.onToggle});
+  StudentTile({super.key, required this.student, required this.isPresent, this.onToggle, required this.marked});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class StudentTile extends StatelessWidget {
           children: [
             Text(student.name),
             AttendanceToggleButton(
+              marked: marked,
               isPresent: isPresent,
               onToggle: onToggle,
             )

@@ -1,6 +1,6 @@
 class Student {
   final String name;
-  Map<String, bool> attendance = {};
+  bool present;
 
-  Student({required this.name});
+  Student({required this.name, this.present = false});
 }

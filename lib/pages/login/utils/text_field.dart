@@ -5,7 +5,7 @@ class MyTextField extends StatelessWidget {
   final String labelText;
   final bool obscureText;
   
-  const MyTextField({super.key, this.controller, required this.labelText, this.obscureText = false});
+  const MyTextField({super.key, required this.controller, required this.labelText, this.obscureText = false});
 
   @override
   Widget build(BuildContext context) {

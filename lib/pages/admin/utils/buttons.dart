@@ -51,12 +51,14 @@ class BatchButton extends StatelessWidget {
 class AttendanceToggleButton extends StatelessWidget {
 
   final bool isPresent;
-  final VoidCallback onToggle;
+  final VoidCallback? onToggle;
+  final bool marked;
 
   AttendanceToggleButton({
     super.key,
     required this.isPresent,
-    required this.onToggle
+    required this.onToggle,
+    required this.marked,
   });
 
   @override
@@ -64,7 +66,7 @@ class AttendanceToggleButton extends StatelessWidget {
     return IconButton(
       icon: Icon(
         isPresent ? Icons.check : Icons.close,
-        color: isPresent ? Colors.green : Colors.red,
+        color: marked? null : (isPresent ? Colors.green : Colors.red),
         size: 20,
       ),
       onPressed: onToggle,

@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_project/pages/admin/admin_dashboard_page.dart';
 import 'package:the_project/pages/login/login_page.dart';
+import 'package:the_project/services/authentication_service.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,9 @@ void main() async{
 }
 
 class MyApp extends StatelessWidget {
+
+  final AuthService _authService = AuthService();
+
   MyApp({super.key});
 
   @override
@@ -37,9 +42,18 @@ class MyApp extends StatelessWidget {
       
       initialRoute: '/admin',
       routes: {
-        '/login':(context) => LoginPage(),
+        '/login':(context) => LoginPage(onLoginSuccess: () {},),
         '/admin':(context) => AdminDashboardPage(),
       },
+
+      // home: StreamBuilder<User?>(
+      //   stream: _authService.userChanges,
+      //   builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.waiting) return CircularProgressIndicator();
+      //     if (snapshot.hasData) return AdminDashboardPage();
+      //     return LoginPage(onLoginSuccess: () => {});
+      //   },
+      // ),
 
     );
   }

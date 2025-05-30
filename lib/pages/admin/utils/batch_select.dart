@@ -11,24 +11,24 @@ class BatchSelectBox extends StatelessWidget {
   
   DateTime selectedDay;
 
-
-  List<Batch> batchesCreated = [
-    Batch(
-      name: '10th A',
-      timing: '1pm - 2pm',
-      students: [Student(name: 'Alice'), Student(name: 'Bob')],
-    ),
-    Batch(
-      name: '9th B',
-      timing: '2pm - 3pm',
-      students: [Student(name: 'Charlie')],
-    ),
-    Batch(
-      name: '10th C',
-      timing: '3pm - 4pm',
-      students: [Student(name: 'David'), Student(name: 'Eva')],
-    ),
-  ];
+  // TESTING DATA
+  // List<Batch> batchesCreated = [
+  //   Batch(
+  //     name: '10th A',
+  //     timing: '1pm - 2pm',
+  //     students: [Student(name: 'Alice'), Student(name: 'Bob')],
+  //   ),
+  //   Batch(
+  //     name: '9th B',
+  //     timing: '2pm - 3pm',
+  //     students: [Student(name: 'Charlie')],
+  //   ),
+  //   Batch(
+  //     name: '10th C',
+  //     timing: '3pm - 4pm',
+  //     students: [Student(name: 'David'), Student(name: 'Eva')],
+  //   ),
+  // ];
 
   BatchSelectBox({super.key, required this.selectedDay});
 
@@ -62,7 +62,7 @@ class BatchSelectBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    //firestoreService.saveBatchesForDay(selectedDay, batchesCreated);
+    // firestoreService.saveBatchesForDay(selectedDay, batchesCreated);
 
     return AlertDialog(
       content: Container(
@@ -95,7 +95,7 @@ class BatchSelectBox extends StatelessWidget {
                         child: Wrap(
                           runSpacing: 15,
                           spacing: 15,
-                          children: batches.map((batch) => BatchTile(batch: batch)).toList(),
+                          children: batches.map((batch) => BatchTile(batch: batch, selectedDate: selectedDay)).toList(),
                         ),
                       ),
                     ),
