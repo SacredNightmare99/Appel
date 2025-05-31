@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
-class DayDropdown extends StatefulWidget {
+class DayDropdown extends StatelessWidget {
 
-  DayDropdown({super.key});
+  String selectedDay;
+  void Function(String?)? onChanged;
 
-  @override
-  State<DayDropdown> createState() => _DayDropdownState();
-}
+  DayDropdown({super.key, this.selectedDay = "", required this.onChanged});
 
-class _DayDropdownState extends State<DayDropdown> {
-  
-  String selectedDay = "";
   final List<String> weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   @override
@@ -26,11 +22,7 @@ class _DayDropdownState extends State<DayDropdown> {
         child: DropdownButton<String>(
           hint: Text("Day"),
           value: selectedDay.isNotEmpty ? selectedDay : null,
-          onChanged: (String? newValue) => {
-            setState(() {
-              selectedDay = newValue!;
-            })
-          },
+          onChanged: onChanged,
           items: weekdays.map((day) {
             return DropdownMenuItem<String>(
               value: day,

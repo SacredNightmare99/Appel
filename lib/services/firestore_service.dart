@@ -32,22 +32,32 @@ class FirestoreService {
     }).toList();
   }
 
-  Future<void> saveBatchesForDay(DateTime date, List<Batch> batches) async {
-    String dayKey = _getWeekdayKey(date);
-    await dayBatches.doc(dayKey).update({
-      'batches': batches.map((b) => {
-        'name': b.name,
-        'timing': b.timing,
-        'marked': false,
-        'students': b.students.map((s) => {
-          'name': s.name,
-        }).toList(),
-      }).toList(),
-    });
-  }
+  Future<void> saveBatchForDay(String day, List<Batch> newBatches) async {
 
-  Future<void> updateAttendance(DateTime date, List<Batch> updatedBatches) async {
-    await saveBatchesForDay(date, updatedBatches); // just overwrite for now
+    final docRef = dayBatches.doc(day.substring(0, 3));
+    final docSnap = await docRef.get();
+
+    List<Map<String, dynamic>> existingBatchMaps = [];
+
+    if (docSnap.exists && docSnap.data() != null) {
+      final data = docSnap.data() as Map<String, dynamic>;
+      final List<dynamic> existingBatches = data['batches'] ?? [];
+
+      existingBatchMaps = existingBatches.cast<Map<String, dynamic>>();
+    }
+
+    final newBatchMaps = newBatches.map((b) => {
+      'name': b.name,
+      'timing': b.timing,
+      'marked': false,
+      'students': b.students.map((s) => {
+        'name': s.name
+      }).toList()
+    }).toList();
+
+    final updateBatchMaps = [...existingBatchMaps.where((existing) => !newBatchMaps.any((b) => b['name'] == existing['name'])), ...newBatchMaps];
+
+    await docRef.set({'batches': updateBatchMaps});
   }
 
   Future<void> saveAttendanceForBatch(List<Batch> newBatches, DateTime date) async {

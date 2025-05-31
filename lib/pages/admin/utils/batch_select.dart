@@ -3,33 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:the_project/pages/admin/data/batch.dart';
-import 'package:the_project/pages/admin/data/student.dart';
 import 'package:the_project/pages/admin/utils/batch_tile.dart';
 import 'package:the_project/services/firestore_service.dart';
 
 class BatchSelectBox extends StatelessWidget {
   
   DateTime selectedDay;
-
-  // TESTING DATA
-  // List<Batch> batchesCreated = [
-  //   Batch(
-  //     name: '10th A',
-  //     timing: '1pm - 2pm',
-  //     students: [Student(name: 'Alice'), Student(name: 'Bob')],
-  //   ),
-  //   Batch(
-  //     name: '9th B',
-  //     timing: '2pm - 3pm',
-  //     students: [Student(name: 'Charlie')],
-  //   ),
-  //   Batch(
-  //     name: '10th C',
-  //     timing: '3pm - 4pm',
-  //     students: [Student(name: 'David'), Student(name: 'Eva')],
-  //   ),
-  // ];
-
   BatchSelectBox({super.key, required this.selectedDay});
 
   final FirestoreService firestoreService = FirestoreService();
@@ -61,8 +40,6 @@ class BatchSelectBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    // firestoreService.saveBatchesForDay(selectedDay, batchesCreated);
 
     return AlertDialog(
       content: Container(
