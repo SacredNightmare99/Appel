@@ -11,21 +11,60 @@ class FirestoreService {
 
   Future<List<Batch>> getBatchesForDay(DateTime date) async {
     String dayKey = _getWeekdayKey(date);
-    final doc = await dayBatches.doc(dayKey).get();
+    final dayDoc = await dayBatches.doc(dayKey).get();
+    final attendanceDoc = await attendance.doc(date.toIso8601String()).get();
 
-    if (!doc.exists || doc.data() == null) return [];
+    if (!dayDoc.exists || dayDoc.data() == null) return [];
 
-    final data = doc.data() as Map<String, dynamic>;
-    final List<dynamic> batchesData = data['batches'] ?? [];
+    final dayData = dayDoc.data() as Map<String, dynamic>;
+    final List<dynamic> batchesData = dayData['batches'] ?? [];
+
+    Map<String, bool> attendanceMarkedStatus = {};
+    Map<String, Map<String, bool>> attendanceStudentStatus = {};
+
+    if (attendanceDoc.exists && attendanceDoc.data() != null) {
+      final attendanceData = attendanceDoc.data() as Map<String, dynamic>;
+      final List<dynamic> attendanceBatches = attendanceData['batches'] ?? [];
+
+      for (var batch in attendanceBatches) {
+
+        final batchName = batch['name'];
+
+        if (batch is Map<String, dynamic> && batch.containsKey('name')) {
+          attendanceMarkedStatus[batchName] = batch['marked'] ?? false;
+        }
+
+        Map<String, bool> studentMap = {};
+        final List<dynamic> students = batch['students'] ?? [];
+
+        for (var s in students) {
+          if (s is Map<String, dynamic> && s.containsKey('name')) {
+            studentMap[s['name']] = s['present'] ?? false;
+          }
+        }
+
+        attendanceStudentStatus[batchName] = studentMap;
+      }
+    }
 
     return batchesData.map((batch) {
+
+      final String batchName = batch['name'];
+      final bool marked = attendanceMarkedStatus[batchName] ?? false;
+      final Map<String, bool> studentPresenceMap = attendanceStudentStatus[batchName] ?? {};
+
+
       return Batch(
-        name: batch['name'],
+        name: batchName,
         timing: batch['timing'],
-        marked: false,
+        marked: marked,
         students: (batch['students'] as List<dynamic>).map((s) {
+          final String studentName = s['name'];
+          final bool present = studentPresenceMap[studentName] ?? false;
+
           return Student(
-            name: s['name'],
+            name: studentName,
+            present: present
           );
         }).toList(),
       );
@@ -77,7 +116,7 @@ class FirestoreService {
     final newBatchMaps = newBatches.map((b) => {
       'name': b.name,
       'timing': b.timing,
-      'marked': b.marked,
+      'marked': true,
       'students': b.students.map((s) => {
         'name': s.name,
         'present': s.present

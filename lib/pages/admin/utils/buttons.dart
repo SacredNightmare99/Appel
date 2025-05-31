@@ -63,13 +63,18 @@ class AttendanceToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        isPresent ? Icons.check : Icons.close,
-        color: marked? null : (isPresent ? Colors.green : Colors.red),
-        size: 20,
-      ),
-      onPressed: onToggle,
+    
+    return Container(
+      height: 20,
+      child: MaterialButton(
+        onPressed: onToggle,
+        child: Text(
+          isPresent? "PRESENT" : "ABSENT",
+          style: TextStyle(
+            color: marked? null : (isPresent ? Colors.green : Colors.red),
+          ),
+        ),
+      )
     );
   }
 }

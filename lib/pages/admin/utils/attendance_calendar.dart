@@ -26,8 +26,11 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
         height: 400,
         width: 500,
         child: TableCalendar(
-        firstDay: DateTime.utc(2023, 1, 1),
+        firstDay: DateTime.utc(2025, 5, 1),
         lastDay: DateTime.utc(2030, 12, 31),
+        availableCalendarFormats: const {
+          CalendarFormat.month: 'Month',
+        },
         focusedDay: _focusedDay,
         selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
         onDaySelected: (selectedDay, focusedDay) {
