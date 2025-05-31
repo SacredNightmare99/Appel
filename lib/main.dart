@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/admin_add_data_page.dart';
 import 'package:the_project/pages/admin/admin_dashboard_page.dart';
 import 'package:the_project/pages/login/login_page.dart';
 import 'package:the_project/services/authentication_service.dart';
@@ -41,11 +39,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue
       ),
       
-      initialRoute: 'admin',
+      initialRoute: '/admin',
       routes: {
-        'login':(context) => LoginPage(onLoginSuccess: () {},),
-        'admin':(context) => AdminDashboardPage(),
-        'admin/add': (context) => AdminAddDataPage(),
+        '/login':(context) => LoginPage(onLoginSuccess: () {},),
+        '/admin':(context) => AdminDashboardPage(),
       },
 
       // home: StreamBuilder<User?>(

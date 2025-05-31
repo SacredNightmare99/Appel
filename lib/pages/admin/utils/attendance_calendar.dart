@@ -5,7 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:the_project/pages/admin/utils/batch_select.dart';
 
 class AttendanceCalendar extends StatefulWidget {
-  AttendanceCalendar({super.key});
+  const AttendanceCalendar({super.key});
 
   @override
   State<AttendanceCalendar> createState() => _AttendanceCalendarState();

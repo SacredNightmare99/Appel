@@ -54,7 +54,7 @@ class AttendanceToggleButton extends StatelessWidget {
   final VoidCallback? onToggle;
   final bool marked;
 
-  AttendanceToggleButton({
+  const AttendanceToggleButton({
     super.key,
     required this.isPresent,
     required this.onToggle,
@@ -91,32 +91,6 @@ class SubmitButton extends StatelessWidget {
       child: MaterialButton(
         onPressed: onPressed,
         child: Text("Submit"),
-      ),
-    );
-  }
-}
-
-class NavigateButton extends StatelessWidget {
-  
-  final String route;
-  final String text;
-
-  const NavigateButton({super.key, required this.route, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(width: 1),
-      ),
-      child: MaterialButton(
-        onPressed: () {
-          Navigator.pushNamed(context, route);
-        },
-        child: Text(text),
       ),
     );
   }
