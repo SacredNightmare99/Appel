@@ -93,8 +93,9 @@ class _BatchTileState extends State<BatchTile> {
           Divider(),
 
           // Submit Button
-          SubmitButton(
+          MyButton(
             onPressed: widget.batch.marked? null : submitAttendance,
+            text: "Submit",
           )
         ],
       ),
@@ -142,14 +143,41 @@ class StudentTile extends StatelessWidget {
 
 // Batch Tile used in view batches that can be edited
 class EditBatchTile extends StatefulWidget {
+  final String weekday;
   final Batch batch;
+  final void Function()? removeBatchFunc;
 
-  const EditBatchTile({super.key, required this.batch});
+  const EditBatchTile({super.key, required this.batch, required this.removeBatchFunc, required this.weekday});
 
   @override
   State<EditBatchTile> createState() => _EditBatchTileState();
 }
 class _EditBatchTileState extends State<EditBatchTile> {
+  final FirestoreService firestoreService = FirestoreService();
+  bool editMode = false;
+
+  void _toggleEditMode() {
+    if (!editMode) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Warning!! Entering Edit Mode! All actions are irreversible!"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+    setState(() {
+      editMode = !editMode;
+    });
+  }
+
+  void _removeStudent(Student student) async {
+    await firestoreService.deleteStudentFromBatchInDay(widget.weekday, widget.batch, student);
+
+    setState(() {
+      widget.batch.students.removeWhere((s) => s.name == student.name);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -164,7 +192,13 @@ class _EditBatchTileState extends State<EditBatchTile> {
         children: [
           Stack(
             children: [
-
+              editMode? Positioned(
+                left: 0,
+                child: IconButton(
+                  onPressed: () {}, 
+                  icon: Icon(Icons.text_fields)
+                ),
+              ) : SizedBox.shrink(),
               Center(
                 child: Column(
                   children: [
@@ -173,18 +207,18 @@ class _EditBatchTileState extends State<EditBatchTile> {
                   ],
                 ),
               ),
-              
               Positioned(
                 right: 0,
                 child: IconButton(
-                  onPressed: () {}, 
-                  icon: Icon(Icons.edit)
+                  onPressed: _toggleEditMode,
+                  icon: Icon(
+                    editMode? Icons.edit_off : Icons.edit
+                  )
                 )
               )
             ],
           ),
           Divider(),
-
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(10),
@@ -192,12 +226,17 @@ class _EditBatchTileState extends State<EditBatchTile> {
               itemBuilder: (context, index) {
                 final student = widget.batch.students[index];
                 return EditStudentTile(
+                  editModeBatch: editMode,
                   student: student,
+                  removeStudentFunc: () {
+                    _removeStudent(student);
+                  },
                 );
               },
             )
           ),
-          Divider(),
+          editMode? Divider() : SizedBox.shrink(),
+          editMode? MyButton(text: "Delete Batch", onPressed: widget.removeBatchFunc) : SizedBox.shrink()
         ],
       ),
     );
@@ -207,8 +246,10 @@ class _EditBatchTileState extends State<EditBatchTile> {
 // Sub-tile of above Edit Batch Tile of students
 class EditStudentTile extends StatelessWidget {
   final Student student;
+  final bool editModeBatch;
+  final void Function()? removeStudentFunc;
 
-  const EditStudentTile({super.key, required this.student});
+  const EditStudentTile({super.key, required this.student, required this.editModeBatch, required this.removeStudentFunc});
 
   @override
   Widget build(BuildContext context) {
@@ -221,11 +262,13 @@ class EditStudentTile extends StatelessWidget {
           border: Border.all(width: 1),
           borderRadius: BorderRadius.circular(10)
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Stack(
           children: [
-            Text(student.name),
-            
+            editModeBatch? Positioned(top: -5, left: 0, child: IconButton(onPressed: removeStudentFunc, icon: Icon(Icons.close), color: Colors.red,))
+              : SizedBox.shrink(),
+            Center(child: Text(student.name)),
+            editModeBatch? Positioned(top: -5, right: 0, child: IconButton(onPressed: () {}, icon: Icon(Icons.text_fields),))
+              : SizedBox.shrink(),
           ],
         ),
       ),

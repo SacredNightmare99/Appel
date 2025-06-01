@@ -12,14 +12,18 @@ class ViewBatches extends StatefulWidget {
 }
 
 class _ViewBatchesState extends State<ViewBatches> {
-
   final FirestoreService firestoreService = FirestoreService();
-
   String selectedDay = "Monday";
+
+  void _removeBatch(Batch batch) async {
+    await firestoreService.deleteBatchFromDay(selectedDay, batch);
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(10),
       width: double.maxFinite,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -53,7 +57,11 @@ class _ViewBatchesState extends State<ViewBatches> {
                       child: Wrap(
                         runSpacing: 15,
                         spacing: 15,
-                        children: batches.map((batch) => EditBatchTile(batch: batch)).toList(),
+                        children: batches.map((batch) => EditBatchTile(
+                          batch: batch, 
+                          removeBatchFunc: () {_removeBatch(batch);},
+                          weekday: selectedDay,
+                        )).toList(),
                       ),
                     ),
                   ),

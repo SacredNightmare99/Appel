@@ -25,7 +25,7 @@ class StudentForm extends StatelessWidget {
           spacing: 80,
           children: [
             StudentField(hint: "Name", controller: nameController),
-            SubmitButton(onPressed: submitOnPressed)
+            MyButton(onPressed: submitOnPressed, text: "Submit",)
           ],
         ),
       ),

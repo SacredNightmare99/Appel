@@ -2,52 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-class DayButton extends StatelessWidget {
-  void Function()? onPressed;
-  String text;
-
-  DayButton({super.key, required this.onPressed, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(width: 1),
-      ),
-      child: MaterialButton(
-        onPressed: onPressed,
-        child: Text(text),
-      ),
-    );
-  }
-}
-
-class BatchButton extends StatelessWidget {
-  void Function()? onPressed;
-  String text;
-
-  BatchButton({super.key, required this.onPressed, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(width: 1),
-      ),
-      child: MaterialButton(
-        onPressed: onPressed,
-        child: Text(text),
-      ),
-    );
-  }
-}
-
 class AttendanceToggleButton extends StatelessWidget {
 
   final bool isPresent;
@@ -79,10 +33,11 @@ class AttendanceToggleButton extends StatelessWidget {
   }
 }
 
-class SubmitButton extends StatelessWidget {
+class MyButton extends StatelessWidget {
   final void Function()? onPressed;
+  final String text;
 
-  const SubmitButton({super.key, required this.onPressed});
+  const MyButton({super.key, required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +50,7 @@ class SubmitButton extends StatelessWidget {
       ),
       child: MaterialButton(
         onPressed: onPressed,
-        child: Text("Submit"),
+        child: Text(text),
       ),
     );
   }

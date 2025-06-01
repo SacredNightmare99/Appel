@@ -28,6 +28,13 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
 
     await firestoreService.saveBatchForDay(day, [newBatch]);
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Batch Added Successfully!"),
+        duration: Duration(seconds: 2),
+      )
+    );
+
     setState(() {
       selectedDay = "";
       batchNameController.clear();
@@ -70,7 +77,7 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
           SizedBox(height: 5,),
           AddStudentContainer(students: students,),
           SizedBox(height: 5,),
-          SubmitButton(onPressed: _onSubmit,)
+          MyButton(onPressed: _onSubmit, text: "Submit",)
         ],
       ),
     );
