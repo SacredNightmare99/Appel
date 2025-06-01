@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/utils/attendance_calendar.dart';
-import 'package:the_project/pages/admin/utils/containers.dart';
+import 'package:the_project/pages/admin/containers/attendance_calendar.dart';
+import 'package:the_project/pages/admin/containers/add_batches.dart';
+import 'package:the_project/pages/admin/containers/view_batches.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -14,6 +15,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
+    ViewBatches(),
     AttendanceCalendar(),
     AddBatchContainer()
   ];
@@ -36,6 +38,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_red_eye),
+            label: "View Batches"
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today), 
             label: "Mark Attendance",

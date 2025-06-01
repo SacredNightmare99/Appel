@@ -13,7 +13,6 @@ class AddBatchContainer extends StatefulWidget {
   @override
   State<AddBatchContainer> createState() => _AddBatchContainerState();
 }
-
 class _AddBatchContainerState extends State<AddBatchContainer> {
   final TextEditingController batchNameController = TextEditingController();
   final TextEditingController batchTimingController = TextEditingController();
@@ -23,21 +22,24 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
   String selectedDay = "";
   List<Student> students = [];
 
-  void _addBatch(String day, String name, String timing, List<Student> students) {
+  void _addBatch(String day, String name, String timing, List<Student> students) async {
     
     Batch newBatch = Batch(name: name, timing: timing, students: students);
 
-    firestoreService.saveBatchForDay(day, [newBatch]);
+    await firestoreService.saveBatchForDay(day, [newBatch]);
+
+    setState(() {
+      selectedDay = "";
+      batchNameController.clear();
+      batchTimingController.clear();
+      students.clear();
+    });
   }
 
   void _onSubmit() {
     
-    if (batchNameController.text.isNotEmpty && batchTimingController.text.isNotEmpty && selectedDay.isNotEmpty) {
+    if (batchNameController.text.isNotEmpty && batchTimingController.text.isNotEmpty && selectedDay.isNotEmpty && students.isNotEmpty) {
       _addBatch(selectedDay, batchNameController.text, batchTimingController.text, students);
-
-      selectedDay = "";
-      batchNameController.clear();
-      batchTimingController.clear();
     }
   }
 
@@ -84,7 +86,6 @@ class AddStudentContainer extends StatefulWidget {
   @override
   State<AddStudentContainer> createState() => _AddStudentContainerState();
 }
-
 class _AddStudentContainerState extends State<AddStudentContainer> {
   final TextEditingController studentName = TextEditingController();
   
@@ -116,27 +117,29 @@ class _AddStudentContainerState extends State<AddStudentContainer> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
             children: [
-              SizedBox(width: 5,),
-              Text("Add Students"),
-              IconButton(onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return StudentForm(
-                      nameController: studentName,
-                      submitOnPressed: () {
-                        if (studentName.text.isNotEmpty) {
-                          Navigator.of(context).pop();
-                          _addStudent(studentName.text);
-                        }
-                      },
-                    );
-                  }
-                );
-              }, icon: Icon(Icons.add, size: 20,))
+              Center(child: Text("Add Students")),
+              Positioned(
+                top: -10,
+                right: 0,
+                child: IconButton(onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return StudentForm(
+                        nameController: studentName,
+                        submitOnPressed: () {
+                          if (studentName.text.isNotEmpty) {
+                            Navigator.of(context).pop();
+                            _addStudent(studentName.text);
+                          }
+                        },
+                      );
+                    }
+                  );
+                }, icon: Icon(Icons.add, size: 20,)),
+              )
             ],
           ),
           Divider(),

@@ -9,7 +9,8 @@ class FirestoreService {
 
   String _getWeekdayKey(DateTime date) => DateFormat('E').format(date);
 
-  Future<List<Batch>> getBatchesForDay(DateTime date) async {
+  // Function to retrieve DATE-wise batch-data (Used in marking attendance functionality)
+  Future<List<Batch>> getBatchesForDate(DateTime date) async {
     String dayKey = _getWeekdayKey(date);
     final dayDoc = await dayBatches.doc(dayKey).get();
     final attendanceDoc = await attendance.doc(date.toIso8601String()).get();
@@ -71,6 +72,35 @@ class FirestoreService {
     }).toList();
   }
 
+  // Function to retrieve only DAY-wise batch-data (Used in view_batches.dart)
+  Future<List<Batch>> getBatchesForDay(String weekday) async {
+    
+    String dayKey = weekday.substring(0,3);
+
+    final dayDoc = await dayBatches.doc(dayKey).get();
+
+    if (!dayDoc.exists || dayDoc.data() == null) return [];
+
+    final dayData = dayDoc.data() as Map<String, dynamic>;
+    final List<dynamic> batchesData = dayData['batches'] ?? [];
+
+    return batchesData.map((batch) {
+      final String batchName = batch['name'];
+
+      return Batch(
+        name: batchName,
+        timing: batch['timing'],
+        students: (batch['students'] as List<dynamic>).map((s) {
+          final String studentName = s['name'];
+          return Student(
+            name: studentName,
+          );
+        }).toList(),
+      );
+    }).toList();
+  }
+
+  // Function to save/create a new batch for a particular weekday
   Future<void> saveBatchForDay(String day, List<Batch> newBatches) async {
 
     final docRef = dayBatches.doc(day.substring(0, 3));
@@ -99,6 +129,7 @@ class FirestoreService {
     await docRef.set({'batches': updateBatchMaps});
   }
 
+  // Function to save the attendance for students of a batch on a particular date
   Future<void> saveAttendanceForBatch(List<Batch> newBatches, DateTime date) async {
 
     final docRef = attendance.doc(date.toIso8601String());
