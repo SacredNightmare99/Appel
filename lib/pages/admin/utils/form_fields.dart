@@ -49,6 +49,7 @@ class StudentField extends StatelessWidget {
         border: Border.all(width: 1)
       ),
       child: TextFormField(
+        autofocus: true,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey),
