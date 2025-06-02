@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:the_project/pages/admin/data/batch.dart';
 import 'package:the_project/pages/admin/data/student.dart';
 import 'package:the_project/pages/admin/utils/buttons.dart';
+import 'package:the_project/pages/admin/utils/student_form.dart';
 import 'package:the_project/services/firestore_service.dart';
 
 // Batch Tile for marking attendance
@@ -31,13 +32,14 @@ class _BatchTileState extends State<BatchTile> {
     }
     setState(() {});
   }
-  void submitAttendance() async {
-    
-    await firestoreService.saveAttendanceForBatch([widget.batch], widget.selectedDate);
-
+  void toggleMarked() async {
     setState(() {
-      widget.batch.marked = true;
+      widget.batch.marked = !widget.batch.marked;
     });
+
+    if (widget.batch.marked) {
+      await firestoreService.saveAttendanceForBatch([widget.batch], widget.selectedDate);
+    }
   }
 
   @override
@@ -94,8 +96,8 @@ class _BatchTileState extends State<BatchTile> {
 
           // Submit Button
           MyButton(
-            onPressed: widget.batch.marked? null : submitAttendance,
-            text: "Submit",
+            onPressed: toggleMarked,
+            text: widget.batch.marked? "Un-mark" : "Mark",
           )
         ],
       ),
@@ -124,7 +126,7 @@ class StudentTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(10)
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(student.name),
             AttendanceToggleButton(
@@ -172,10 +174,97 @@ class _EditBatchTileState extends State<EditBatchTile> {
 
   void _removeStudent(Student student) async {
     await firestoreService.deleteStudentFromBatchInDay(widget.weekday, widget.batch, student);
-
     setState(() {
       widget.batch.students.removeWhere((s) => s.name == student.name);
     });
+  }
+
+  void _addStudent() {
+    final TextEditingController newStudentName = TextEditingController();
+
+    showDialog(context: context, builder: (builder) {
+      return StudentForm(
+        nameController: newStudentName,
+        submitOnPressed: () async {
+          Student newStudent = Student(name: newStudentName.text);
+          await firestoreService.addStudentToBatchOnDay(widget.weekday, widget.batch, newStudent);
+          setState(() {
+            widget.batch.students.add(newStudent);
+          });
+          newStudentName.clear();
+          Navigator.of(context).pop();
+        },
+      );
+    });
+  }
+
+  void _editStudentName(Student student) {
+    final TextEditingController editController = TextEditingController(text: student.name);
+
+    showDialog(
+      context: context,
+      builder: (builder) {
+        return StudentForm(
+          nameController: editController,
+          submitOnPressed: () async {
+            final oldName = student.name;
+            final newName = editController.text.trim();
+
+            if (newName.isNotEmpty && newName != oldName) {
+              await firestoreService.deleteStudentFromBatchInDay(widget.weekday, widget.batch, student);
+
+              final updatedStudent = Student(name: newName);
+              await firestoreService.addStudentToBatchOnDay(widget.weekday, widget.batch, updatedStudent);
+
+              final snapshots = await firestoreService.attendance.get();
+
+              for (final doc in snapshots.docs) {
+                final data = doc.data() as Map<String, dynamic>;
+                final List<dynamic> batches = data['batches'] ?? [];
+
+                bool changed = false;
+
+                final updatedBatches = batches.map((b) {
+                  if (b['name'] == widget.batch.name) {
+                    final List<dynamic> students = b['students'] ?? [];
+
+                    final updatedStudents = students.map((s) {
+                      if (s['name'] == oldName) {
+                        changed = true;
+                        return {
+                          'name': newName,
+                          'present': s['present'],
+                        };
+                      }
+                      return s;
+                    }).toList();
+
+                    return {
+                      ...b,
+                      'students': updatedStudents,
+                    };
+                  }
+                  return b;
+                }).toList();
+
+                if (changed) {
+                  await firestoreService.attendance.doc(doc.id).update({'batches': updatedBatches});
+                }
+              }
+
+              setState(() {
+                final index = widget.batch.students.indexWhere((s) => s.name == oldName);
+                if (index != -1) {
+                  widget.batch.students[index] = updatedStudent;
+                }
+              });
+            }
+
+            Navigator.of(context).pop();
+          }
+        );
+      }
+    );
   }
 
   @override
@@ -219,6 +308,7 @@ class _EditBatchTileState extends State<EditBatchTile> {
             ],
           ),
           Divider(),
+          // Student Tiles View
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(10),
@@ -228,14 +318,19 @@ class _EditBatchTileState extends State<EditBatchTile> {
                 return EditStudentTile(
                   editModeBatch: editMode,
                   student: student,
-                  removeStudentFunc: () {
-                    _removeStudent(student);
-                  },
+                  removeStudentFunc: () => _removeStudent(student),
+                  editStudentFunc: () => _editStudentName(student),
                 );
               },
             )
           ),
+          // Add Student Button
+          editMode? IconButton(
+            onPressed: _addStudent, 
+            icon: Icon(Icons.add)
+          ) : SizedBox.shrink(),
           editMode? Divider() : SizedBox.shrink(),
+          // Delete Batch Button
           editMode? MyButton(text: "Delete Batch", onPressed: widget.removeBatchFunc) : SizedBox.shrink()
         ],
       ),
@@ -248,8 +343,15 @@ class EditStudentTile extends StatelessWidget {
   final Student student;
   final bool editModeBatch;
   final void Function()? removeStudentFunc;
+  final void Function()? editStudentFunc;
 
-  const EditStudentTile({super.key, required this.student, required this.editModeBatch, required this.removeStudentFunc});
+  const EditStudentTile({
+    super.key, 
+    required this.student, 
+    required this.editModeBatch, 
+    required this.removeStudentFunc,
+    required this.editStudentFunc
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +369,14 @@ class EditStudentTile extends StatelessWidget {
             editModeBatch? Positioned(top: -5, left: 0, child: IconButton(onPressed: removeStudentFunc, icon: Icon(Icons.close), color: Colors.red,))
               : SizedBox.shrink(),
             Center(child: Text(student.name)),
-            editModeBatch? Positioned(top: -5, right: 0, child: IconButton(onPressed: () {}, icon: Icon(Icons.text_fields),))
+            editModeBatch? Positioned(
+              top: -5, 
+              right: 0, 
+              child: IconButton(
+                onPressed: editStudentFunc, 
+                icon: Icon(Icons.text_fields),
+                )
+              )
               : SizedBox.shrink(),
           ],
         ),

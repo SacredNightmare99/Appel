@@ -161,60 +161,94 @@ class FirestoreService {
 
   // Function to remove a specific batch from a specific weekday
   Future<void> deleteBatchFromDay(String weekday, Batch batchToDelete) async {
-  final String dayKey = weekday.substring(0, 3);
-  final docRef = dayBatches.doc(dayKey);
-  final docSnap = await docRef.get();
+    final String dayKey = weekday.substring(0, 3);
+    final docRef = dayBatches.doc(dayKey);
+    final docSnap = await docRef.get();
 
-  if (!docSnap.exists || docSnap.data() == null) return;
+    if (!docSnap.exists || docSnap.data() == null) return;
 
-  final data = docSnap.data() as Map<String, dynamic>;
-  final List<dynamic> batches = data['batches'] ?? [];
+    final data = docSnap.data() as Map<String, dynamic>;
+    final List<dynamic> batches = data['batches'] ?? [];
 
-  // Remove the batch with the same name
-  final updatedBatches = batches.where((b) {
-    if (b is Map<String, dynamic> && b.containsKey('name')) {
-      return b['name'] != batchToDelete.name;
-    }
-    return true;
-  }).toList();
+    // Remove the batch with the same name
+    final updatedBatches = batches.where((b) {
+      if (b is Map<String, dynamic> && b.containsKey('name')) {
+        return b['name'] != batchToDelete.name;
+      }
+      return true;
+    }).toList();
 
-  // Update Firestore
-  await docRef.set({'batches': updatedBatches});
-}
+    // Update Firestore
+    await docRef.set({'batches': updatedBatches});
+  }
 
   // Function to remove a specific student from a specific batch from a specific weekday
   Future<void> deleteStudentFromBatchInDay(String weekday, Batch batch, Student studentToDelete) async {
-  final String dayKey = weekday.substring(0, 3);
-  final docRef = dayBatches.doc(dayKey);
-  final docSnap = await docRef.get();
+    final String dayKey = weekday.substring(0, 3);
+    final docRef = dayBatches.doc(dayKey);
+    final docSnap = await docRef.get();
 
-  if (!docSnap.exists || docSnap.data() == null) return;
+    if (!docSnap.exists || docSnap.data() == null) return;
 
-  final data = docSnap.data() as Map<String, dynamic>;
-  final List<dynamic> batches = data['batches'] ?? [];
+    final data = docSnap.data() as Map<String, dynamic>;
+    final List<dynamic> batches = data['batches'] ?? [];
 
-  // Reconstruct the updated batch list with the student removed from the target batch
-  final updatedBatches = batches.map((b) {
-    if (b is Map<String, dynamic> && b['name'] == batch.name) {
-      final List<dynamic> students = b['students'] ?? [];
+    // Reconstruct the updated batch list with the student removed from the target batch
+    final updatedBatches = batches.map((b) {
+      if (b is Map<String, dynamic> && b['name'] == batch.name) {
+        final List<dynamic> students = b['students'] ?? [];
 
-      final updatedStudents = students.where((s) {
-        if (s is Map<String, dynamic> && s.containsKey('name')) {
-          return s['name'] != studentToDelete.name;
+        final updatedStudents = students.where((s) {
+          if (s is Map<String, dynamic> && s.containsKey('name')) {
+            return s['name'] != studentToDelete.name;
+          }
+          return true;
+        }).toList();
+
+        return {
+          ...b,
+          'students': updatedStudents,
+        };
+      } else {
+        return b;
+      }
+    }).toList();
+
+    await docRef.set({'batches': updatedBatches});
+  }
+
+  // Function to add a student to a specific batch on a specific weekday
+  Future<void> addStudentToBatchOnDay(String weekday, Batch batch, Student student) async {
+    final String dayKey = weekday.substring(0, 3);
+    final docRef = dayBatches.doc(dayKey);
+    final docSnap = await docRef.get();
+
+    if (!docSnap.exists || docSnap.data() == null) return;
+
+    final data = docSnap.data() as Map<String, dynamic>;
+    final List<dynamic> batches = data['batches'] ?? [];
+
+    final updatedBatches = batches.map((b) {
+      if (b is Map<String, dynamic> && b['name'] == batch.name) {
+        final List<dynamic> students = b['students'] ?? [];
+
+        // Check if student already exists
+        final studentExists = students.any((s) =>
+            s is Map<String, dynamic> && s['name'] == student.name);
+
+        if (!studentExists) {
+          students.add({'name': student.name});
         }
-        return true;
-      }).toList();
 
-      return {
-        ...b,
-        'students': updatedStudents,
-      };
-    } else {
-      return b;
-    }
-  }).toList();
+        return {
+          ...b,
+          'students': students,
+        };
+      } else {
+        return b;
+      }
+    }).toList();
 
-  await docRef.set({'batches': updatedBatches});
-}
-
+    await docRef.set({'batches': updatedBatches});
+  }
 }

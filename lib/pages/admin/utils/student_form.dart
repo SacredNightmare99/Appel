@@ -21,9 +21,9 @@ class StudentForm extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 80,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Text("Adding a Student", style: TextStyle(fontSize: 20),),
             StudentField(hint: "Name", controller: nameController),
             MyButton(onPressed: submitOnPressed, text: "Submit",)
           ],

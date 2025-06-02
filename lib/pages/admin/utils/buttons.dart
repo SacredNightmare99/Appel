@@ -17,16 +17,31 @@ class AttendanceToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String label = isPresent ? "PRESENT" : "ABSENT";
+    final Color color = isPresent ? Colors.green : Colors.red;
     
     return Container(
       height: 20,
       child: MaterialButton(
         onPressed: onToggle,
-        child: Text(
-          isPresent? "PRESENT" : "ABSENT",
-          style: TextStyle(
-            color: marked? null : (isPresent ? Colors.green : Colors.red),
-          ),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: label[0],
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              TextSpan(
+                text: label.substring(1),
+                style: TextStyle(
+                  color: marked ? null : color
+                )
+              )
+            ]
+          )
         ),
       )
     );

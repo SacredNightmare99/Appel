@@ -44,8 +44,7 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
   }
 
   void _onSubmit() {
-    
-    if (batchNameController.text.isNotEmpty && batchTimingController.text.isNotEmpty && selectedDay.isNotEmpty && students.isNotEmpty) {
+    if (batchNameController.text.isNotEmpty && batchTimingController.text.isNotEmpty && selectedDay.isNotEmpty) {
       _addBatch(selectedDay, batchNameController.text, batchTimingController.text, students);
     }
   }
