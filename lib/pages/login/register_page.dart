@@ -1,42 +1,31 @@
-// ignore_for_file: unused_field
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:the_project/pages/login/utils/login_button.dart';
 import 'package:the_project/pages/login/utils/text_field.dart';
 import 'package:the_project/services/auth_service.dart';
 
-class LoginPage extends StatefulWidget {
-
-  LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   String errorMessage = "";
 
-  void login() async {
+  void register() async {
     try {
-      await authService.value.signIn(email: _emailController.text, password: _passwordController.text);
+      await authService.value.createAccount(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      Navigator.of(context).pop();
       _emailController.clear();
       _passwordController.clear();
-      Navigator.pushReplacementNamed(context, '/auth');
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message ?? "There is an error";
-      });
-    }
-  }
-
-  void loginGoogle() async {
-    try {
-      await authService.value.signInWithGoogle();
-      Navigator.pushReplacementNamed(context, '/auth');
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message ?? "There is an error";
@@ -49,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Login"),
+        title: Text("Register"),
         automaticallyImplyLeading: true,
       ),
       body: Center(
@@ -69,15 +58,10 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 10,),
               Text(errorMessage, style: TextStyle(color: Colors.red),),
-              SizedBox(height: 10,),
-              IconButton(
-                onPressed: loginGoogle, 
-                icon: Icon(Icons.g_mobiledata_rounded, size: 30,)
-              ),
               SizedBox(height: 100,),
               LoginButton(
-                onPressed: login,
-                text: "Login",
+                onPressed: register,
+                text: "Register",
               )
             ],
           ),

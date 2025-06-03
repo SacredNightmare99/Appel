@@ -251,4 +251,12 @@ class FirestoreService {
 
     await docRef.set({'batches': updatedBatches});
   }
+
+  // Assign roles
+  Future<void> assignRole(String email, String role) async {
+    await FirebaseFirestore.instance.collection('users').doc(email).set({
+      'role': role,
+    });
+  }
+
 }

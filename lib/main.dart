@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:the_project/auth_layout.dart';
 import 'package:the_project/pages/admin/admin_dashboard_page.dart';
+import 'package:the_project/pages/landing_page.dart';
 import 'package:the_project/pages/login/login_page.dart';
-import 'package:the_project/services/authentication_service.dart';
+import 'package:the_project/pages/login/register_page.dart';
+import 'package:the_project/pages/students/student_dashboard_page.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,32 +30,34 @@ void main() async{
 
 class MyApp extends StatelessWidget {
 
-  final AuthService _authService = AuthService();
-
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "The Project",
+      title: "Attendance LFWA",
       theme: ThemeData(
         primarySwatch: Colors.blue
       ),
-      
-      initialRoute: '/admin',
+    
+      initialRoute: '/auth',
       routes: {
-        '/login':(context) => LoginPage(onLoginSuccess: () {},),
+        '/auth':(context) => AuthLayout(),
+        '/':(context) => LandingPage(),
+        '/login':(context) => LoginPage(),
+        '/register':(context) => RegisterPage(),
         '/admin':(context) => AdminDashboardPage(),
+        '/student':(context) => StudentDashboardPage()
       },
-
-      // home: StreamBuilder<User?>(
-      //   stream: _authService.userChanges,
-      //   builder: (context, snapshot) {
-      //     if (snapshot.connectionState == ConnectionState.waiting) return CircularProgressIndicator();
-      //     if (snapshot.hasData) return AdminDashboardPage();
-      //     return LoginPage(onLoginSuccess: () => {});
-      //   },
-      // ),
+      builder: (context, child) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final currentRoute = ModalRoute.of(context)?.settings.name;
+          if (currentRoute != '/auth') {
+            Navigator.of(context).pushReplacementNamed('/auth');
+          }
+        });
+        return child!;
+      },
 
     );
   }
