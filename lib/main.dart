@@ -11,6 +11,8 @@ import 'package:the_project/pages/students/student_dashboard_page.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
+   print('Running on web? $kIsWeb');
+
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(

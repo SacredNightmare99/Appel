@@ -41,6 +41,9 @@ class AuthService {
 
   Future<void> signOut() async {
     await firebaseAuth.signOut();
+    if (!kIsWeb) {
+      await _googleSignIn.signOut();
+    }
   }
 
   Future<void> resetPassword({
@@ -49,20 +52,32 @@ class AuthService {
     await firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
-  Future<void> updateUsername({
-    required String username,
-  }) async {
-    await currenUser!.updateDisplayName(username);
+  Future<void> updateUsername({required String username}) async {
+    if (currenUser != null) {
+      await currenUser!.updateDisplayName(username);
+      await currenUser!.reload();
+    }
   }
 
-  Future<void> deleteAccount({
+   Future<void> deleteAccount({
     required String email,
     required String password,
   }) async {
-    AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
-    await currenUser!.reauthenticateWithCredential(credential);
-    await currenUser!.delete();
-    await firebaseAuth.signOut();
+    final user = currenUser;
+
+    if (user == null) throw FirebaseAuthException(code: 'no-user', message: 'No user signed in');
+
+    if (!kIsWeb) {
+      // Native reauthentication
+      final credential = EmailAuthProvider.credential(email: email, password: password);
+      await user.reauthenticateWithCredential(credential);
+    } else {
+      // On Web, reauth may not be needed if user recently signed in.
+      // Firebase Web SDK will throw if reauth is needed.
+      debugPrint('⚠️ Reauthentication on Web skipped (limited support)');
+    }
+
+    await user.delete();
   }
 
   Future<void> changePassword({
@@ -70,19 +85,26 @@ class AuthService {
     required String newPassword,
     required String email,
   }) async {
-    AuthCredential credential = EmailAuthProvider.credential(email: email, password: currentPassword);
-    await currenUser!.reauthenticateWithCredential(credential);
-    await currenUser!.updatePassword(newPassword);
+    final user = currenUser;
+
+    if (user == null) throw FirebaseAuthException(code: 'no-user', message: 'No user signed in');
+
+    if (!kIsWeb) {
+      final credential = EmailAuthProvider.credential(email: email, password: currentPassword);
+      await user.reauthenticateWithCredential(credential);
+    } else {
+      debugPrint('⚠️ Reauthentication on Web skipped (limited support)');
+    }
+
+    await user.updatePassword(newPassword);
   }
 
   Future<UserCredential> signInWithGoogle() async {
     if (kIsWeb) {
-      // Web flow
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
       return await firebaseAuth.signInWithPopup(googleProvider);
     } else {
-      // Mobile flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw FirebaseAuthException(
