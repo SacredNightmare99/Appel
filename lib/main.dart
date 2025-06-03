@@ -50,16 +50,7 @@ class MyApp extends StatelessWidget {
         '/register':(context) => RegisterPage(),
         '/admin':(context) => AdminDashboardPage(),
         '/student':(context) => StudentDashboardPage()
-      },
-      builder: (context, child) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final currentRoute = ModalRoute.of(context)?.settings.name;
-          if (currentRoute != '/auth') {
-            Navigator.of(context).pushReplacementNamed('/auth');
-          }
-        });
-        return child!;
-      },
+      }
 
     );
   }

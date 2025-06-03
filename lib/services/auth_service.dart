@@ -100,28 +100,18 @@ class AuthService {
   }
 
   Future<UserCredential> signInWithGoogle() async {
-    if (kIsWeb) {
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-      return await firebaseAuth.signInWithPopup(googleProvider);
-    } else {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_ABORTED_BY_USER',
-          message: 'Sign in aborted by user',
-        );
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      return await firebaseAuth.signInWithCredential(credential);
-    }
+  if (!kIsWeb) {
+    throw UnsupportedError('Google sign-in is only supported on web in this build');
   }
+
+  GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+  // Optional: Add scopes
+  googleProvider
+    .addScope('email')
+    .addScope('profile');
+
+  return await firebaseAuth.signInWithPopup(googleProvider);
+}
 
 }
