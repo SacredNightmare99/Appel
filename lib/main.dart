@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:the_project/auth_layout.dart';
 import 'package:the_project/pages/admin/admin_dashboard_page.dart';
 import 'package:the_project/pages/landing_page.dart';
@@ -10,18 +11,17 @@ import 'package:the_project/pages/students/student_dashboard_page.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-
-   print('Running on web? $kIsWeb');
+  await dotenv.load();
 
   if (kIsWeb) {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyBCgcYzy7MhUw_jCuIPGuv_OQSqbq3W71A",
-        authDomain: "attendance-project-682d7.firebaseapp.com",
-        appId: "1:1077795804592:web:54fbc66783067953f5b275", 
-        messagingSenderId: "1077795804592", 
-        projectId: "attendance-project-682d7",
-        storageBucket: "attendance-project-682d7.firebasestorage.app",
+      options: FirebaseOptions(
+        apiKey: dotenv.env['API_KEY']!,
+        authDomain: dotenv.env['Auth_Domain']!,
+        appId: dotenv.env['App_Id']!, 
+        messagingSenderId: dotenv.env['Messaging_Sender_Id']!, 
+        projectId: dotenv.env['Project_Id']!,
+        storageBucket: dotenv.env['Storage_Bucket']!,
       )
     );
   }
