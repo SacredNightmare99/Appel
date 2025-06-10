@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/app/admin/pages/attendance_calendar.dart';
-import 'package:the_project/app/admin/pages/add_batches.dart';
-import 'package:the_project/app/admin/pages/view_batches.dart';
+import 'package:the_project/utils/routes.dart';
 
-class AdminDashboardPage extends StatefulWidget {
-  const AdminDashboardPage({super.key});
+class NavBar extends StatefulWidget {
+  const NavBar({super.key});
 
   @override
-  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
+  State<NavBar> createState() => _NavBarState();
 }
 
-class _AdminDashboardPageState extends State<AdminDashboardPage> {
+class _NavBarState extends State<NavBar> {
 
   int _selectedIndex = 1;
 
   static const List<Widget> _pages = [
-    ViewBatches(),
-    AttendanceCalendar(),
-    AddBatchContainer()
+    viewScreenRoute,
+    markAttendanceRoute,
+    addDataRoute
   ];
   
   void _onItemTapped(int index) {
@@ -43,7 +41,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add), 
-            label: "Add Batches"
+            label: "Add"
           ),
         ]
       ),

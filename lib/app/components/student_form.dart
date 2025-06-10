@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/app/admin/utils/buttons.dart';
-import 'package:the_project/app/admin/utils/form_fields.dart';
+import 'package:the_project/app/components/buttons.dart';
+import 'package:the_project/app/components/form_fields.dart';
 
 class StudentForm extends StatelessWidget {
   

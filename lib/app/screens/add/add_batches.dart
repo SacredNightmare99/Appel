@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/app/admin/data/batch.dart';
-import 'package:the_project/app/admin/data/student.dart';
-import 'package:the_project/app/admin/utils/buttons.dart';
-import 'package:the_project/app/admin/utils/dropdowns.dart';
-import 'package:the_project/app/admin/utils/form_fields.dart';
-import 'package:the_project/app/admin/utils/student_form.dart';
-import 'package:the_project/services/firestore_service.dart';
+import 'package:the_project/app/classes/batch.dart';
+import 'package:the_project/app/classes/student.dart';
+import 'package:the_project/app/components/buttons.dart';
+import 'package:the_project/app/components/dropdowns.dart';
+import 'package:the_project/app/components/form_fields.dart';
+import 'package:the_project/app/components/student_form.dart';
 
 class AddBatchContainer extends StatefulWidget {
   const AddBatchContainer({super.key});
@@ -17,7 +16,6 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
   final TextEditingController batchNameController = TextEditingController();
   final TextEditingController batchTimingController = TextEditingController();
 
-  final FirestoreService firestoreService = FirestoreService();
 
   String selectedDay = "";
   List<Student> students = [];
@@ -26,7 +24,6 @@ class _AddBatchContainerState extends State<AddBatchContainer> {
     
     Batch newBatch = Batch(name: name, timing: timing, students: students);
 
-    await firestoreService.saveBatchForDay(day, [newBatch]);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

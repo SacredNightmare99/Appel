@@ -1,11 +1,10 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:the_project/app/admin/data/batch.dart';
-import 'package:the_project/app/admin/data/student.dart';
-import 'package:the_project/app/admin/utils/buttons.dart';
-import 'package:the_project/app/admin/utils/student_form.dart';
-import 'package:the_project/services/firestore_service.dart';
+import 'package:the_project/app/classes/batch.dart';
+import 'package:the_project/app/classes/student.dart';
+import 'package:the_project/app/components/buttons.dart';
+import 'package:the_project/app/components/student_form.dart';
 
 // Batch Tile for marking attendance
 class BatchTile extends StatefulWidget {
@@ -18,7 +17,6 @@ class BatchTile extends StatefulWidget {
   State<BatchTile> createState() => _BatchTileState();
 }
 class _BatchTileState extends State<BatchTile> {
-  final FirestoreService firestoreService = FirestoreService();
 
   void resetAttendance() {
     for (var student in widget.batch.students) {
@@ -37,9 +35,9 @@ class _BatchTileState extends State<BatchTile> {
       widget.batch.marked = !widget.batch.marked;
     });
 
-    if (widget.batch.marked) {
-      await firestoreService.saveAttendanceForBatch([widget.batch], widget.selectedDate);
-    }
+    // if (widget.batch.marked) {
+    //   await firestoreService.saveAttendanceForBatch([widget.batch], widget.selectedDate);
+    // }
   }
 
   @override
@@ -155,7 +153,6 @@ class EditBatchTile extends StatefulWidget {
   State<EditBatchTile> createState() => _EditBatchTileState();
 }
 class _EditBatchTileState extends State<EditBatchTile> {
-  final FirestoreService firestoreService = FirestoreService();
   bool editMode = false;
 
   void _toggleEditMode() {
@@ -173,10 +170,7 @@ class _EditBatchTileState extends State<EditBatchTile> {
   }
 
   void _removeStudent(Student student) async {
-    await firestoreService.deleteStudentFromBatchInDay(widget.weekday, widget.batch, student);
-    setState(() {
-      widget.batch.students.removeWhere((s) => s.name == student.name);
-    });
+    
   }
 
   void _addStudent() {
@@ -187,7 +181,7 @@ class _EditBatchTileState extends State<EditBatchTile> {
         nameController: newStudentName,
         submitOnPressed: () async {
           Student newStudent = Student(name: newStudentName.text);
-          await firestoreService.addStudentToBatchOnDay(widget.weekday, widget.batch, newStudent);
+         // await firestoreService.addStudentToBatchOnDay(widget.weekday, widget.batch, newStudent);
           setState(() {
             widget.batch.students.add(newStudent);
           });
@@ -198,74 +192,7 @@ class _EditBatchTileState extends State<EditBatchTile> {
     });
   }
 
-  void _editStudentName(Student student) {
-    final TextEditingController editController = TextEditingController(text: student.name);
-
-    showDialog(
-      context: context,
-      builder: (builder) {
-        return StudentForm(
-          nameController: editController,
-          submitOnPressed: () async {
-            final oldName = student.name;
-            final newName = editController.text.trim();
-
-            if (newName.isNotEmpty && newName != oldName) {
-              await firestoreService.deleteStudentFromBatchInDay(widget.weekday, widget.batch, student);
-
-              final updatedStudent = Student(name: newName);
-              await firestoreService.addStudentToBatchOnDay(widget.weekday, widget.batch, updatedStudent);
-
-              final snapshots = await firestoreService.attendance.get();
-
-              for (final doc in snapshots.docs) {
-                final data = doc.data() as Map<String, dynamic>;
-                final List<dynamic> batches = data['batches'] ?? [];
-
-                bool changed = false;
-
-                final updatedBatches = batches.map((b) {
-                  if (b['name'] == widget.batch.name) {
-                    final List<dynamic> students = b['students'] ?? [];
-
-                    final updatedStudents = students.map((s) {
-                      if (s['name'] == oldName) {
-                        changed = true;
-                        return {
-                          'name': newName,
-                          'present': s['present'],
-                        };
-                      }
-                      return s;
-                    }).toList();
-
-                    return {
-                      ...b,
-                      'students': updatedStudents,
-                    };
-                  }
-                  return b;
-                }).toList();
-
-                if (changed) {
-                  await firestoreService.attendance.doc(doc.id).update({'batches': updatedBatches});
-                }
-              }
-
-              setState(() {
-                final index = widget.batch.students.indexWhere((s) => s.name == oldName);
-                if (index != -1) {
-                  widget.batch.students[index] = updatedStudent;
-                }
-              });
-            }
-
-            Navigator.of(context).pop();
-          }
-        );
-      }
-    );
-  }
+  void _editStudentName(Student student) {}
 
   @override
   Widget build(BuildContext context) {

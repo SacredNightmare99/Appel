@@ -1,44 +1,34 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:the_project/app/login/utils/login_button.dart';
-import 'package:the_project/app/login/utils/text_field.dart';
-import 'package:the_project/services/auth_service.dart';
+// ignore_for_file: unused_field
 
-class RegisterPage extends StatefulWidget {
-  RegisterPage({super.key});
+import 'package:flutter/material.dart';
+import 'package:the_project/auth/utils/login_button.dart';
+import 'package:the_project/auth/utils/text_field.dart';
+
+class LoginPage extends StatefulWidget {
+
+  LoginPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   String errorMessage = "";
 
-  void register() async {
-    try {
-      await authService.value.createAccount(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      Navigator.of(context).pop();
-      _emailController.clear();
-      _passwordController.clear();
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message ?? "There is an error";
-      });
-    }
+  void login() async {
+    
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Register"),
+        title: Text("Login"),
         automaticallyImplyLeading: true,
       ),
       body: Center(
@@ -58,10 +48,15 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 10,),
               Text(errorMessage, style: TextStyle(color: Colors.red),),
+              SizedBox(height: 10,),
+              IconButton(
+                onPressed: () {}, 
+                icon: Icon(Icons.g_mobiledata_rounded, size: 30,)
+              ),
               SizedBox(height: 100,),
               LoginButton(
-                onPressed: register,
-                text: "Register",
+                onPressed: login,
+                text: "Login",
               )
             ],
           ),

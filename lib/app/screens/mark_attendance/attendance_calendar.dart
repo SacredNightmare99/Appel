@@ -3,9 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_project/app/admin/data/batch.dart';
-import 'package:the_project/app/admin/utils/tiles.dart';
-import 'package:the_project/services/firestore_service.dart';
+import 'package:the_project/app/classes/batch.dart';
+import 'package:the_project/app/components/tiles.dart';
 
 class AttendanceCalendar extends StatefulWidget {
   const AttendanceCalendar({super.key});
@@ -69,7 +68,6 @@ class BatchSelectBox extends StatelessWidget {
   DateTime selectedDay;
   BatchSelectBox({super.key, required this.selectedDay});
 
-  final FirestoreService firestoreService = FirestoreService();
 
   String getFormatedDate() {
     String day = selectedDay.day.toString();
@@ -109,35 +107,35 @@ class BatchSelectBox extends StatelessWidget {
             Text(getFormatedDate(), style: TextStyle(fontSize: 20),),
             SizedBox(height: 20,),
 
-            Expanded(
-              child: FutureBuilder<List<Batch>>(
-                future: firestoreService.getBatchesForDate(selectedDay),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("No batches found."));
-                  }
+            // Expanded(
+              // child: FutureBuilder<List<Batch>>(
+              //   future: firestoreService.getBatchesForDate(selectedDay),
+              //   builder: (context, snapshot) {
+              //     if (snapshot.connectionState == ConnectionState.waiting) {
+              //       return const Center(child: CircularProgressIndicator());
+              //     } else if (snapshot.hasError) {
+              //       return Center(child: Text("Error: ${snapshot.error}"));
+              //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              //       return const Center(child: Text("No batches found."));
+              //     }
 
-                  final batches = snapshot.data!;
+              //     final batches = snapshot.data!;
 
-                  return SingleChildScrollView(
-                    child: Container(
-                      width: double.maxFinite,
-                      child: Center(
-                        child: Wrap(
-                          runSpacing: 15,
-                          spacing: 15,
-                          children: batches.map((batch) => BatchTile(batch: batch, selectedDate: selectedDay)).toList(),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+              //     return SingleChildScrollView(
+              //       child: Container(
+              //         width: double.maxFinite,
+              //         child: Center(
+              //           child: Wrap(
+              //             runSpacing: 15,
+              //             spacing: 15,
+              //             children: batches.map((batch) => BatchTile(batch: batch, selectedDate: selectedDay)).toList(),
+              //           ),
+              //         ),
+              //       ),
+              //     );
+              //   },
+              // ),
+            // ),
           ],
         ),
       ),
