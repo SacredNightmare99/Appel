@@ -1,4 +1,4 @@
-import 'package:the_project/pages/admin/data/student.dart';
+import 'package:the_project/app/admin/data/student.dart';
 
 class Batch {
   final String name;

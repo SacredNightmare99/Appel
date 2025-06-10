@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/utils/buttons.dart';
+import 'package:the_project/app/admin/utils/buttons.dart';
 import 'package:the_project/services/auth_service.dart';
 
 class StudentDashboardPage extends StatelessWidget {

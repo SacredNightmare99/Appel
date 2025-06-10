@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_project/pages/admin/data/batch.dart';
-import 'package:the_project/pages/admin/utils/tiles.dart';
+import 'package:the_project/app/admin/data/batch.dart';
+import 'package:the_project/app/admin/utils/tiles.dart';
 import 'package:the_project/services/firestore_service.dart';
 
 class AttendanceCalendar extends StatefulWidget {
@@ -21,35 +21,44 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(
-          border: Border.all(width: 1),
-          borderRadius: BorderRadius.circular(10)
-        ),
-        height: 400,
-        width: 500,
-        child: TableCalendar(
-        firstDay: DateTime.utc(2025, 5, 1),
-        lastDay: DateTime.utc(2030, 12, 31),
-        availableCalendarFormats: const {
-          CalendarFormat.month: 'Month',
-        },
-        focusedDay: _focusedDay,
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-            showDialog(
-              context: context,
-              builder: (context) {
-                return BatchSelectBox(
-                  selectedDay: selectedDay,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Mark Attendance"),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(width: 1),
+              borderRadius: BorderRadius.circular(10)
+            ),
+            height: 400,
+            width: 500,
+            child: TableCalendar(
+            firstDay: DateTime.utc(2025, 5, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            availableCalendarFormats: const {
+              CalendarFormat.month: 'Month',
+            },
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return BatchSelectBox(
+                      selectedDay: selectedDay,
+                    );
+                  }
                 );
-              }
-            );
-          },
+              },
+          ),
+        ),
       ),
     );
   }

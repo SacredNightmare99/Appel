@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:the_project/pages/admin/data/batch.dart';
-import 'package:the_project/pages/admin/data/student.dart';
+import 'package:the_project/app/admin/data/batch.dart';
+import 'package:the_project/app/admin/data/student.dart';
 
 class FirestoreService {
   final CollectionReference dayBatches = FirebaseFirestore.instance.collection('day_batches');

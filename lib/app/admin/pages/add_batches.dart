@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/data/batch.dart';
-import 'package:the_project/pages/admin/data/student.dart';
-import 'package:the_project/pages/admin/utils/buttons.dart';
-import 'package:the_project/pages/admin/utils/dropdowns.dart';
-import 'package:the_project/pages/admin/utils/form_fields.dart';
-import 'package:the_project/pages/admin/utils/student_form.dart';
+import 'package:the_project/app/admin/data/batch.dart';
+import 'package:the_project/app/admin/data/student.dart';
+import 'package:the_project/app/admin/utils/buttons.dart';
+import 'package:the_project/app/admin/utils/dropdowns.dart';
+import 'package:the_project/app/admin/utils/form_fields.dart';
+import 'package:the_project/app/admin/utils/student_form.dart';
 import 'package:the_project/services/firestore_service.dart';
 
 class AddBatchContainer extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/containers/attendance_calendar.dart';
-import 'package:the_project/pages/admin/containers/add_batches.dart';
-import 'package:the_project/pages/admin/containers/view_batches.dart';
+import 'package:the_project/app/admin/pages/attendance_calendar.dart';
+import 'package:the_project/app/admin/pages/add_batches.dart';
+import 'package:the_project/app/admin/pages/view_batches.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -14,7 +14,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   int _selectedIndex = 1;
 
-  static const List<Widget> _pages = <Widget>[
+  static const List<Widget> _pages = [
     ViewBatches(),
     AttendanceCalendar(),
     AddBatchContainer()
@@ -29,11 +29,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Dashboard"),
-        automaticallyImplyLeading: false,
-      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

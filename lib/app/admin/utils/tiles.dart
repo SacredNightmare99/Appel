@@ -1,10 +1,10 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:the_project/pages/admin/data/batch.dart';
-import 'package:the_project/pages/admin/data/student.dart';
-import 'package:the_project/pages/admin/utils/buttons.dart';
-import 'package:the_project/pages/admin/utils/student_form.dart';
+import 'package:the_project/app/admin/data/batch.dart';
+import 'package:the_project/app/admin/data/student.dart';
+import 'package:the_project/app/admin/utils/buttons.dart';
+import 'package:the_project/app/admin/utils/student_form.dart';
 import 'package:the_project/services/firestore_service.dart';
 
 // Batch Tile for marking attendance
