@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:the_project/shell_page.dart';
+import 'package:the_project/widgets/navbar/custom_navbar.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +14,7 @@ void main() async{
     anonKey: dotenv.env['SupabaseAPI']!
   );
 
+  Get.put(NavController());
   runApp(MyApp());
 
 }
@@ -23,8 +26,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Attendance LFWA",
+      title: "Learn French With Anuj",
       debugShowCheckedModeBanner: false,
+      home: ShellPage(),
     );
   }
 }
