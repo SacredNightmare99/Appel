@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:the_project/shell_page.dart';
-import 'package:the_project/widgets/navbar/custom_navbar.dart';
+import 'package:the_project/widgets/custom_navbar.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

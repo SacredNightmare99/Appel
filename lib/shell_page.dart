@@ -5,7 +5,7 @@ import 'package:the_project/pages/attendance_page.dart';
 import 'package:the_project/pages/batches_page.dart';
 import 'package:the_project/pages/home_page.dart';
 import 'package:the_project/pages/students_page.dart';
-import 'package:the_project/widgets/navbar/custom_navbar.dart';
+import 'package:the_project/widgets/custom_navbar.dart';
 
 class ShellPage extends StatelessWidget {
   const ShellPage({super.key});
