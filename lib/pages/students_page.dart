@@ -7,6 +7,7 @@ import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
+import 'package:the_project/widgets/cards.dart';
 
 class StudentsPage extends StatelessWidget {
   const StudentsPage({super.key});
@@ -67,33 +68,42 @@ class StudentsPage extends StatelessWidget {
             // View Students List
             Expanded(
               flex: 1,
-              child: _OuterCard(
-                child: _InnerCard(
-                  child: StreamBuilder(
-                    stream: streamStudents(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.redAccent,
-                          ),
-                        );
-                      }
-
-                      if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      }
-
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text("No Students found."));
-                      }
-                                
-                      final students = snapshot.data ?? [];
-                      return ListView.builder(
-                        itemCount: students.length,
-                        itemBuilder: (context, index) => _StudentTile(student: students[index])
-                      );
-                    }
+              child: OuterCard(
+                child: InnerCard(
+                  child: Column(
+                    children: [
+                      Center(child: const Text("Students"),),
+                      Divider(),
+                      SizedBox(
+                        height: AppHelper.screenHeight(context)-168,
+                        child: StreamBuilder(
+                          stream: streamStudents(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.redAccent,
+                                ),
+                              );
+                            }
+                        
+                            if (snapshot.hasError) {
+                              return Center(child: Text("Error: ${snapshot.error}"));
+                            }
+                        
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Center(child: Text("No Students found."));
+                            }
+                                      
+                            final students = snapshot.data ?? [];
+                            return ListView.builder(
+                              itemCount: students.length,
+                              itemBuilder: (context, index) => _StudentTile(student: students[index])
+                            );
+                          }
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -101,7 +111,7 @@ class StudentsPage extends StatelessWidget {
             // Student Details
             Expanded(
               flex: 5,
-              child: _OuterCard(
+              child: OuterCard(
                 child: Obx(() {
                   final selectedStudent = studentController.selectedStudent.value;
                   return Row(
@@ -110,7 +120,7 @@ class StudentsPage extends StatelessWidget {
                       // Details
                       Expanded(
                         flex: 2,
-                        child: _InnerCard(
+                        child: InnerCard(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +157,7 @@ class StudentsPage extends StatelessWidget {
                       // Attendance
                       Expanded(
                         flex: 1,
-                        child: _InnerCard(
+                        child: InnerCard(
                           child: Column(
                             children: [
                               const Text("Attendance"),
@@ -222,48 +232,6 @@ class _StudentTile extends StatelessWidget {
             child: Text(student.name),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _OuterCard extends StatelessWidget {
-  final Widget? child;
-
-  const _OuterCard({this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color.fromARGB(255, 208, 211, 219),
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(10),
-        side: BorderSide(width: 1)
-      ),
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(10),
-        child: child ?? SizedBox.shrink()
-      ),
-    );
-  }
-}
-
-class _InnerCard extends StatelessWidget {
-  final Widget? child;
-
-  const _InnerCard({this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color.fromARGB(255, 235, 237, 243),
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(7),
-        side: BorderSide(width: 0.5)
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: child ?? SizedBox.shrink(),
       ),
     );
   }
