@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:the_project/backend/attendance.dart';
+import 'package:the_project/backend/batch.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
@@ -63,7 +64,7 @@ class StudentsPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 10,
           children: [
-            // View Students
+            // View Students List
             Expanded(
               flex: 1,
               child: _OuterCard(
@@ -89,7 +90,6 @@ class StudentsPage extends StatelessWidget {
                                 
                       final students = snapshot.data ?? [];
                       return ListView.builder(
-                        padding: EdgeInsets.all(10),
                         itemCount: students.length,
                         itemBuilder: (context, index) => _StudentTile(student: students[index])
                       );
@@ -111,13 +111,35 @@ class StudentsPage extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: _InnerCard(
-                          child: selectedStudent == null? 
-                          Center(child: const Text("Select a Student"),) :
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(selectedStudent.name),
-                              
+                              Center(child: const Text("Student Details")),
+                              Divider(),
+                              selectedStudent == null? Expanded(child: Center(child: const Text("Select a Student"),)) : 
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text("Name: ${selectedStudent.name}"),
+                                  FutureBuilder(
+                                    future: getBatchForStudent(selectedStudent.batchUid ?? ""),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      }
+                                      final batch = snapshot.data;
+
+                                      if (batch == null) {
+                                        return const Text('Batch: No batch assigned');
+                                      }
+
+                                      return Text("Batch: ${batch.name}");
+                                    }
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -126,45 +148,40 @@ class StudentsPage extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: _InnerCard(
-                          child: selectedStudent == null ? Center(child: Text("Attendance will be shown after a Student has been selected"),) : 
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              spacing: 10,
-                              children: [
-                                const Text("Attendance"),
-                                Divider(),
-                                SizedBox(
-                                  height: AppHelper.screenHeight(context) - 188,
-                                  child: StreamBuilder(
-                                    stream: streamAttendanceForStudent(studentController.selectedStudent.value!),
-                                    builder: (context, snapshot) {
-
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return const Center(child: CircularProgressIndicator(
-                                            color: Colors.redAccent,
-                                          ),
-                                        );
-                                      }
-
-                                      if (snapshot.hasError) {
-                                        return Center(child: Text("Error: ${snapshot.error}"));
-                                      }
-
-                                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                        return const Center(child: Text("No attendance found."));
-                                      }
-
-                                      final attendance = snapshot.data!;
-                                      return ListView.builder(
-                                        itemCount: attendance.length,
-                                        itemBuilder: (context, index) => _AttendanceTile(attendance: attendance[index],)
+                          child: Column(
+                            children: [
+                              const Text("Attendance"),
+                              Divider(),
+                              selectedStudent == null ? Expanded(child: const Center(child: Text("Attendance will be shown after a Student has been selected"),)) : SizedBox(
+                                height: AppHelper.screenHeight(context) - 188,
+                                child: StreamBuilder(
+                                  stream: streamAttendanceForStudent(studentController.selectedStudent.value!),
+                                  builder: (context, snapshot) {
+                          
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator(
+                                          color: Colors.redAccent,
+                                        ),
                                       );
                                     }
-                                  ),
+                          
+                                    if (snapshot.hasError) {
+                                      return Center(child: Text("Error: ${snapshot.error}"));
+                                    }
+                          
+                                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return const Center(child: Text("No attendance found."));
+                                    }
+                          
+                                    final attendance = snapshot.data!;
+                                    return ListView.builder(
+                                      itemCount: attendance.length,
+                                      itemBuilder: (context, index) => _AttendanceTile(attendance: attendance[index],)
+                                    );
+                                  }
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           )
                         ),
                       ),
@@ -244,7 +261,10 @@ class _InnerCard extends StatelessWidget {
         borderRadius: BorderRadiusGeometry.circular(7),
         side: BorderSide(width: 0.5)
       ),
-      child: child ?? SizedBox.shrink(),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: child ?? SizedBox.shrink(),
+      ),
     );
   }
 }

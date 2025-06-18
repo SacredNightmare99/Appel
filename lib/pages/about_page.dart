@@ -8,6 +8,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      body: Center(child: Image.asset('assets/lfwa_logo.png')),
     );
   }
 }

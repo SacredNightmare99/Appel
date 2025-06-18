@@ -20,7 +20,7 @@ Stream<List<Attendance>> streamAttendanceForStudent(Student student) {
   return supabase
       .from('attendance')
       .stream(primaryKey: ['uid'])
-      .eq('student_uid', student.uid!)
+      .eq('student_uid', student.uid)
       .map((data) => data
           .map((item) => Attendance.fromMap(item))
           .toList());

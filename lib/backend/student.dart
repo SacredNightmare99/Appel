@@ -2,14 +2,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Student {
   final String name;
-  final String? uid;
+  final String uid;
+  final String?  batchUid;
   final int classesAttended;
 
-  const Student({required this.name, this.uid, this.classesAttended = 0});
+  const Student({required this.name, required this.uid, this.batchUid, this.classesAttended = 0});
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
       name: map['name'],
-      uid: map['uid']
+      uid: map['uid'],
+      batchUid: map['batch_id'],
     );
 
 }
