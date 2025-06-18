@@ -18,13 +18,46 @@ class StudentsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton( // Add students
-        onPressed: () {},
+        onPressed: () {
+          final nameController = TextEditingController();
+
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text("Add Student"),
+                content: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: "Enter Student name",
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(), 
+                    child: const Text('Cancel')
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final name = nameController.text.trim();
+                      if (name.isNotEmpty) {
+                        await insertStudent(name);
+                        Navigator.of(context).pop();
+                      }
+                    }, 
+                    child: const Text("Add"),
+                  )
+                ],
+              );
+            },
+          );
+        },
         backgroundColor: AppColors.navbar,
         child: Icon(Iconsax.add, color: Colors.white,),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       body: Container(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
@@ -34,23 +67,34 @@ class StudentsPage extends StatelessWidget {
             Expanded(
               flex: 1,
               child: _OuterCard(
-                child: StreamBuilder(
-                  stream: streamStudents(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.redAccent,
-                        ),
+                child: _InnerCard(
+                  child: StreamBuilder(
+                    stream: streamStudents(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.redAccent,
+                          ),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text("No Students found."));
+                      }
+                                
+                      final students = snapshot.data ?? [];
+                      return ListView.builder(
+                        padding: EdgeInsets.all(10),
+                        itemCount: students.length,
+                        itemBuilder: (context, index) => _StudentTile(student: students[index])
                       );
                     }
-
-                    final students = snapshot.data ?? [];
-                    return ListView.builder(
-                      itemCount: students.length,
-                      itemBuilder: (context, index) => _StudentTile(student: students[index])
-                    );
-                  }
+                  ),
                 ),
               ),
             ),
@@ -68,10 +112,12 @@ class StudentsPage extends StatelessWidget {
                         flex: 2,
                         child: _InnerCard(
                           child: selectedStudent == null? 
-                          Center(child: Text("Select a Student"),) :
+                          Center(child: const Text("Select a Student"),) :
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(selectedStudent.name)
+                              Text(selectedStudent.name),
+                              
                             ],
                           ),
                         ),
@@ -86,7 +132,7 @@ class StudentsPage extends StatelessWidget {
                             child: Column(
                               spacing: 10,
                               children: [
-                                Text("Attendance"),
+                                const Text("Attendance"),
                                 Divider(),
                                 SizedBox(
                                   height: AppHelper.screenHeight(context) - 188,

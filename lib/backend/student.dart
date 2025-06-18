@@ -23,3 +23,24 @@ Stream<List<Student>> streamStudents() {
           .map((item) => Student.fromMap(item))
           .toList());
 }
+
+Future<void> insertStudent(String name) async {
+  final supabase = Supabase.instance.client;
+
+  try {
+    await supabase.from('students').insert({'name': name});
+  } catch (e) {
+    throw Exception('Insert failed: $e');
+  }
+}
+
+Future<void> removeStudent(String uid) async {
+  final supabase = Supabase.instance.client;
+
+  try {
+    await supabase.from('students').delete().eq('uid', uid);
+  } catch (e) {
+    throw Exception('Remove failed: $e');
+  }
+
+}
