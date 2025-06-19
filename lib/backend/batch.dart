@@ -54,3 +54,15 @@ Stream<List<Batch>> streamBatches() {
             .map((item) => Batch.fromMap(item))
             .toList());
 }
+
+Stream<List<Batch>> streamBatchesByDay(String day) {
+  final supabase = Supabase.instance.client;
+
+  return supabase
+      .from('batches')
+      .stream(primaryKey: ['batch_uid'])
+      .eq('day', day)
+      .map((data) => data
+          .map((item) => Batch.fromMap(item))
+          .toList());
+}

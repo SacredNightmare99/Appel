@@ -44,7 +44,7 @@ class StudentsPage extends StatelessWidget {
                       final name = nameController.text.trim();
                       if (name.isNotEmpty) {
                         await insertStudent(name);
-                        Navigator.of(context).pop();
+                        Get.back();
                       }
                     }, 
                     child: const Text("Add"),
@@ -207,36 +207,6 @@ class StudentsPage extends StatelessWidget {
   }
 }
 
-
-class _StudentTile extends StatelessWidget {
-  final Student student;
-  const _StudentTile({required this.student});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<StudentController>();
-
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: InkWell(
-        onTap: () => controller.selectStudent(student),
-        child: Material(
-          shape: BeveledRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(5),
-            side: const BorderSide(width: 1)
-          ),
-          color: Colors.redAccent[200],
-          child: Container(
-            margin: EdgeInsets.all(4),
-            padding: EdgeInsets.all(4),
-            child: Text(student.name),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _AttendanceTile extends StatelessWidget {
 
   final Attendance attendance;
@@ -286,6 +256,35 @@ class _AttendanceTile extends StatelessWidget {
               attendance.present? "Present" : "Absent"
             )
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StudentTile extends StatelessWidget {
+  final Student student;
+  const _StudentTile({required this.student});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<StudentController>();
+
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: InkWell(
+        onTap: () => controller.selectStudent(student),
+        child: Material(
+          shape: BeveledRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(5),
+            side: const BorderSide(width: 1)
+          ),
+          color: Colors.redAccent[200],
+          child: Container(
+            margin: EdgeInsets.all(4),
+            padding: EdgeInsets.all(4),
+            child: Text(student.name),
+          ),
         ),
       ),
     );

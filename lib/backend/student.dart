@@ -26,6 +26,17 @@ Stream<List<Student>> streamStudents() {
           .toList());
 }
 
+Stream<List<Student>> streamStudentsByBatch(String batchUid) {
+  final supabase = Supabase.instance.client;
+  return supabase
+      .from('students')
+      .stream(primaryKey: ['uid'])
+      .eq('batch_id', batchUid)
+      .map((data) => data
+          .map((item) => Student.fromMap(item))
+          .toList());
+}
+
 Future<void> insertStudent(String name) async {
   final supabase = Supabase.instance.client;
 

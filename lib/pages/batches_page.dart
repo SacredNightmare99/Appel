@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:the_project/backend/batch.dart';
+import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/batch_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
@@ -81,23 +82,76 @@ class BatchesPage extends StatelessWidget {
               child: OuterCard(
                 child: Obx(() { 
                   final selectedBatch = batchController.selectedBatch.value;
-                  return InnerCard(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(child: const Text("Batch Details")),
-                        Divider(),
-                        selectedBatch == null ? Expanded(child: Center(child: const Text("Select a batch"),)) : 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Name: ${selectedBatch.name}"),
-                            Text("Timings: ${formatTo12HourTime(selectedBatch.startTime)} to ${formatTo12HourTime(selectedBatch.endTime)}")
-                          ],
-                        )
-                      ],
-                    ),
+                  return Row(
+                    spacing: 5,
+                    children: [
+                      // Details
+                      Expanded(
+                        flex: 5,
+                        child: InnerCard(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(child: const Text("Batch Details")),
+                              Divider(),
+                              selectedBatch == null ? Expanded(child: Center(child: const Text("Select a batch"),)) : 
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Name: ${selectedBatch.name}"),
+                                  Text("Timings: ${formatTo12HourTime(selectedBatch.startTime)} to ${formatTo12HourTime(selectedBatch.endTime)}"),
+                                  Text("Day: ${selectedBatch.day}"),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Students
+                      Expanded(
+                        flex: 1,
+                        child: InnerCard(
+                          child: Column(
+                            children: [
+                              Center(child: const Text("Students"),),
+                              Divider(),
+                              selectedBatch == null? Expanded(child: Center(child: const Text("Select a batch"),)) :
+                              SizedBox(
+                                height: AppHelper.screenHeight(context) - 168,
+                                child: StreamBuilder(
+                                  stream: streamStudentsByBatch(selectedBatch.uid),
+                                  builder: (context, snapshot) {
+
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.redAccent,
+                                        ),
+                                      );
+                                    }
+
+                                    if (snapshot.hasError) {
+                                      return Center(child: Text("Error: ${snapshot.error}"));
+                                    }
+                                
+                                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return const Center(child: Text("No Students assigned."));
+                                    }
+                                    
+                                    final students = snapshot.data ?? [];
+                                    return ListView.builder(
+                                      itemCount: students.length,
+                                      itemBuilder: (context, index) => _StudentTile(student: students[index]),
+                                    );
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
                   );
                 }
                 )
@@ -109,8 +163,6 @@ class BatchesPage extends StatelessWidget {
     );
   }
 }
-
-
 
 class _BatchTile extends StatelessWidget {
   final Batch batch;
@@ -141,3 +193,27 @@ class _BatchTile extends StatelessWidget {
   }
 }
 
+class _StudentTile extends StatelessWidget {
+  final Student student;
+
+  const _StudentTile({required this.student});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        shape: BeveledRectangleBorder(
+          borderRadius: BorderRadiusGeometry.circular(5),
+          side: const BorderSide(width: 1)
+        ),
+        color: Colors.redAccent[200],
+        child: Container(
+          margin: EdgeInsets.all(4),
+          padding: EdgeInsets.all(4),
+          child: Text(student.name),
+        ),
+      ),
+    );
+  }
+}

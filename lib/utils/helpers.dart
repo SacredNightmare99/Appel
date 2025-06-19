@@ -11,4 +11,8 @@ class AppHelper {
     return MediaQuery.of(context).size.width;
   }
 
+  static double responsiveSize(BuildContext context, double baseSize) {
+    return baseSize * (screenWidth(context) / 1920); // tune divisor for your base layout
+  }
+
 }
