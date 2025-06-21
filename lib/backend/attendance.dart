@@ -21,7 +21,39 @@ Stream<List<Attendance>> streamAttendanceForStudent(Student student) {
       .from('attendance')
       .stream(primaryKey: ['uid'])
       .eq('student_uid', student.uid)
+      .order('date')
       .map((data) => data
           .map((item) => Attendance.fromMap(item))
           .toList());
+}
+
+Future<void> markAttendanceForStudent(Student student, bool present, DateTime date) async {
+  final supabase = Supabase.instance.client;
+
+  final dateOnly = DateTime(date.year, date.month, date.day);
+
+  await supabase.from('attendance').insert(({
+    'date': dateOnly.toIso8601String(),
+    'present': present,
+    'student_uid': student.uid,
+  }));
+
+}
+
+Future<bool> ifAttendanceMarked(DateTime date, Student student) async {
+  final supabase = Supabase.instance.client;
+
+  final dateOnly = DateTime(date.year, date.month, date.day).toIso8601String();
+
+  try {
+    final result = await supabase
+          .from('attendance')
+          .select()
+          .eq('student_uid', student.uid)
+          .eq('date', dateOnly)
+          .maybeSingle();
+    return result != null;
+  } catch (e) {
+    return false;
+  }
 }

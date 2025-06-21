@@ -50,6 +50,7 @@ Stream<List<Batch>> streamBatches() {
 
   return supabase.from("batches")
       .stream(primaryKey: ['batch_uid'])
+      .order('start_time')
       .map((data) => data
             .map((item) => Batch.fromMap(item))
             .toList());
@@ -62,7 +63,47 @@ Stream<List<Batch>> streamBatchesByDay(String day) {
       .from('batches')
       .stream(primaryKey: ['batch_uid'])
       .eq('day', day)
+      .order('start_time')
       .map((data) => data
           .map((item) => Batch.fromMap(item))
           .toList());
 }
+
+Future<void> insertBatch({
+  required String name,
+  required String day,
+  required TimeOfDay startTime,
+  required TimeOfDay endTime,
+}) async {
+  final supabase = Supabase.instance.client;
+
+  // Helper to format TimeOfDay as "HH:mm"
+  String formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  try {
+    await supabase.from('batches').insert({
+      'name': name,
+      'day': day,
+      'start_time': formatTime(startTime),
+      'end_time': formatTime(endTime),
+    });
+  } catch (e) {
+    debugPrint('Batch Insert failed: $e');
+    throw Exception('Insert failed: $e');
+  }
+}
+
+Future<void> deleteBatch(String batchUid) async {
+  final supabase = Supabase.instance.client;
+  try {
+    await supabase.from('batches').delete().eq('batch_uid', batchUid);
+  } catch (e) {
+    debugPrint("Remove failed: $e");
+    throw Exception('Remove failed: $e');
+  }
+}
+

@@ -22,6 +22,7 @@ class CustomCalendar extends StatelessWidget {
       onDaySelected: (selectedDay, focusedDay) {
         controller.selectDate(focusedDay);
       },
+      enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
       calendarStyle: CalendarStyle(
         defaultTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
         weekendTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), color: Colors.red),

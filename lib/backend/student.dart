@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:the_project/backend/batch.dart';
 
 class Student {
   final String name;
@@ -31,9 +33,9 @@ Stream<List<Student>> streamStudentsByBatch(String batchUid) {
   return supabase
       .from('students')
       .stream(primaryKey: ['uid'])
-      .eq('batch_id', batchUid)
       .map((data) => data
           .map((item) => Student.fromMap(item))
+          .where((student) => student.batchUid == batchUid)
           .toList());
 }
 
@@ -47,7 +49,7 @@ Future<void> insertStudent(String name) async {
   }
 }
 
-Future<void> removeStudent(String uid) async {
+Future<void> deleteStudent(String uid) async {
   final supabase = Supabase.instance.client;
 
   try {
@@ -55,5 +57,43 @@ Future<void> removeStudent(String uid) async {
   } catch (e) {
     throw Exception('Remove failed: $e');
   }
+
+}
+
+Future<List<Student>> getUnassignedStudents() async {
+  final supabase = Supabase.instance.client;
+  
+  try {
+    final data = await supabase
+        .from('students')
+        .select()
+        .filter('batch_id', 'is', null);
+    return (data as List)
+        .map((item) => Student.fromMap(item))
+        .toList();
+  } catch (e) {
+    debugPrint('Fetch Failed: $e');
+    throw Exception('Fetch failed: $e');
+  }
+
+}
+
+Future<void> assignStudentToBatch(Student student, Batch batch) async {
+  final supabase = Supabase.instance.client;
+
+  await supabase
+    .from('students')
+    .update({'batch_id': batch.uid})
+    .eq('uid', student.uid);
+  
+}
+
+Future<void> unassignStudentFromBatch(Student student) async {
+  final supabase = Supabase.instance.client;
+
+  await supabase
+    .from('students')
+    .update({'batch_id': null})
+    .eq('uid', student.uid);
 
 }

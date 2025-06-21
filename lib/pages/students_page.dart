@@ -8,6 +8,7 @@ import 'package:the_project/pages/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
 import 'package:the_project/widgets/cards.dart';
+import 'package:the_project/widgets/custom_buttons.dart';
 
 class StudentsPage extends StatelessWidget {
   const StudentsPage({super.key});
@@ -17,47 +18,65 @@ class StudentsPage extends StatelessWidget {
 
     final studentController = Get.put(StudentController());
 
+    void addStudent() {
+      final nameController = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Add Student"),
+          content: TextField(
+            controller: nameController,
+            decoration: InputDecoration(
+              hintText: "Enter Student name",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Cancel')
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final name = nameController.text.trim();
+                if (name.isNotEmpty) {
+                  await insertStudent(name);
+                  Get.back();
+                }
+              }, 
+              child: const Text("Add"),
+            )
+          ],
+        )
+      );
+    }
+
+    void removeStudent(Student student) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Confirm Delete"),
+          content: Text("Are you sure you want to delete ${student.name}?"),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await deleteStudent(student.uid);
+                studentController.selectedStudent.value = null;
+                Get.back();
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        ),
+      );
+    }
+
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton( // Add students
-        onPressed: () {
-          final nameController = TextEditingController();
-
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text("Add Student"),
-                content: TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Student name",
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(), 
-                    child: const Text('Cancel')
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final name = nameController.text.trim();
-                      if (name.isNotEmpty) {
-                        await insertStudent(name);
-                        Get.back();
-                      }
-                    }, 
-                    child: const Text("Add"),
-                  )
-                ],
-              );
-            },
-          );
-        },
-        backgroundColor: AppColors.navbar,
-        child: Icon(Iconsax.add, color: Colors.white,),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       body: Container(
         padding: const EdgeInsets.all(10),
         child: Row(
@@ -88,17 +107,33 @@ class StudentsPage extends StatelessWidget {
                             }
                         
                             if (snapshot.hasError) {
-                              return Center(child: Text("Error: ${snapshot.error}"));
+                              debugPrint('Stream error: ${snapshot.error}');
+                              return const Center(child: Text("An error occurred while loading students."));
                             }
                         
                             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return const Center(child: Text("No Students found."));
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text("No Students found."),
+                                    const SizedBox(height: 20),
+                                    AddButton(onPressed: addStudent)
+                                  ],
+                                ),
+                              );
                             }
                                       
                             final students = snapshot.data ?? [];
                             return ListView.builder(
-                              itemCount: students.length,
-                              itemBuilder: (context, index) => _StudentTile(student: students[index])
+                              itemCount: students.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index < students.length) {
+                                  return _StudentTile(student: students[index]);
+                                } else {
+                                  return AddButton(onPressed: addStudent);
+                                }
+                              } 
                             );
                           }
                         ),
@@ -125,7 +160,29 @@ class StudentsPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Center(child: const Text("Student Details")),
+                              selectedStudent != null
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    const Text(
+                                      "Student Details",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Positioned(
+                                      right: 0,
+                                      child: IconButton(onPressed: () => removeStudent(selectedStudent), icon: Icon(Iconsax.minus_square, color: Colors.redAccent, size: 18,))
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const Center(
+                                child: Text(
+                                  "Student Details",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                               Divider(),
                               selectedStudent == null? Expanded(child: Center(child: const Text("Select a Student"),)) : 
                               Column(
@@ -176,7 +233,8 @@ class StudentsPage extends StatelessWidget {
                                     }
                           
                                     if (snapshot.hasError) {
-                                      return Center(child: Text("Error: ${snapshot.error}"));
+                                      debugPrint('Stream error: ${snapshot.error}');
+                                      return const Center(child: Text("An error occurred while loading attendance."));
                                     }
                           
                                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -215,29 +273,6 @@ class _AttendanceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    String formatDate(DateTime date) {
-      final day = date.day;
-      String suffix = "";
-      if (day >= 11 && day <= 13) suffix = 'th';
-      switch (day % 10) {
-        case 1:
-          suffix = 'st';
-        case 2:
-          suffix = 'nd';
-        case 3:
-          suffix = 'rd';
-        default:
-          suffix = 'th';
-      }
-      const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ];
-      final month = months[date.month - 1];
-      final year = date.year;
-      return '$day$suffix $month, $year';
-    }
    
     return Material(
       shape: BeveledRectangleBorder(
@@ -251,9 +286,31 @@ class _AttendanceTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(formatDate(attendance.date)),
-            Text(
-              attendance.present? "Present" : "Absent"
+            Text(AppHelper.formatDate(attendance.date)),
+            Text.rich(
+              TextSpan(
+                children: attendance.present
+                    ? [
+                        const TextSpan(
+                          text: 'P',
+                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                        const TextSpan(
+                          text: 'resent',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ]
+                    : [
+                        const TextSpan(
+                          text: 'A',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                        const TextSpan(
+                          text: 'bsent',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ],
+              ),
             )
           ],
         ),
@@ -279,7 +336,6 @@ class _StudentTile extends StatelessWidget {
             borderRadius: BorderRadiusGeometry.circular(5),
             side: const BorderSide(width: 1)
           ),
-          color: Colors.redAccent[200],
           child: Container(
             margin: EdgeInsets.all(4),
             padding: EdgeInsets.all(4),
