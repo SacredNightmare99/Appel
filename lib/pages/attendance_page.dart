@@ -407,11 +407,10 @@ class _BatchTileState extends State<_BatchTile> {
       padding: const EdgeInsets.all(4.0),
       child: Material(
         color: AppColors.tileBackground,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(12),
         elevation: 1,
-        child: Container(
-          padding: EdgeInsets.all(5),
-          width: (AppHelper.screenWidth(context)/4).clamp(300, 600),
+        child: SizedBox(
+          width: (AppHelper.screenWidth(context)/5).clamp(300, 600),
           height: AppHelper.screenHeight(context)/3,
           child: Column(
             children: [
@@ -426,14 +425,24 @@ class _BatchTileState extends State<_BatchTile> {
                     topRight: Radius.circular(12),
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    widget.batch.name,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 0
+                child: Row(
+                  children: [ 
+                    Text(
+                      widget.batch.name,
+                      style: TextStyle(
+                        color: Colors.white,
+                        letterSpacing: 0
+                      ),
                     ),
-                  )
+                    Spacer(),
+                    Text(
+                      "${AppHelper.formatTo12HourTime(widget.batch.startTime)} to ${AppHelper.formatTo12HourTime(widget.batch.endTime)}",
+                      style: TextStyle(
+                        color: Colors.white,
+                        letterSpacing: 0
+                      ),
+                    )
+                  ]
                 ),
               ),
               SizedBox(

@@ -9,6 +9,7 @@ class BatchController extends GetxController {
   var dayBatches = <Batch>[].obs;
   var isAllLoading = false.obs;
   var isDayLoading = false.obs;
+  var filteredBatches = <Batch>[].obs;
 
   void selectBatch(Batch batch) {
     selectedBatch.value = batch;
@@ -19,7 +20,10 @@ class BatchController extends GetxController {
 
     try {
       final supabase = Supabase.instance.client;
-      final data = await supabase.from('batches').select();
+      final data = await supabase
+          .from('batches')
+          .select()
+          .order('start_time');
 
       allBatches.value = (data as List)
           .map((item) => Batch.fromMap(item))
@@ -40,7 +44,8 @@ class BatchController extends GetxController {
       final data = await supabase
           .from('batches')
           .select()
-          .eq('day', day);
+          .eq('day', day)
+          .order('start_time');
 
       dayBatches.value = (data as List)
           .map((item) => Batch.fromMap(item))
@@ -53,10 +58,21 @@ class BatchController extends GetxController {
     }
   }
 
+  void filterBatchesByName(String query) {
+    if (query.isEmpty) {
+      filteredBatches.assignAll(allBatches);
+    } else {
+      filteredBatches.assignAll(
+        allBatches.where((batch) => batch.name.toLowerCase().contains(query.toLowerCase()))
+      );
+    }
+  }
+  
   @override
   void onInit() {
     super.onInit();
     refreshAllBatches();
+    ever(allBatches, (_) => filteredBatches.assignAll(allBatches));
   }
 
 }

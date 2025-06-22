@@ -10,6 +10,7 @@ import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
+import 'package:the_project/widgets/search_overlay.dart';
 
 class StudentsPage extends StatefulWidget {
   const StudentsPage({super.key});
@@ -22,6 +23,10 @@ class _StudentsPageState extends State<StudentsPage> {
 
   final studentController = Get.find<StudentController>();
   final attendanceController = Get.find<AttendanceController>();
+  final TextEditingController _searchController = TextEditingController();
+  final LayerLink _layerLink = LayerLink();
+  final FocusNode _searchFocus = FocusNode();
+  final searchButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -29,6 +34,33 @@ class _StudentsPageState extends State<StudentsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       studentController.selectedStudent.value = null;
     });
+    _searchController.addListener(() {
+      studentController.filterStudentsByName(_searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showSearchOverlay(GlobalKey key) {
+    final overlay = Overlay.of(key.currentContext!);
+    late OverlayEntry searchOverlay;
+
+    searchOverlay = OverlayEntry(
+      builder: (context) => CustomSearchOverlay(
+        overlayEntry: searchOverlay,
+        searchController: _searchController,
+        layerLink: _layerLink,
+        searchFocus: _searchFocus,
+        onChanged: (value) => studentController.filterStudentsByName(value),
+        hintText: "Search Students...",
+      )
+    );
+
+    overlay.insert(searchOverlay);
   }
 
   @override
@@ -98,7 +130,6 @@ class _StudentsPageState extends State<StudentsPage> {
       );
     }
 
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
@@ -115,44 +146,64 @@ class _StudentsPageState extends State<StudentsPage> {
                 child: InnerCard(
                   child: Column(
                     children: [
-                      CustomHeader(text: "Students"),
+                      Stack(
+                        children: [
+                          CustomHeader(text: "Students"),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: CompositedTransformTarget(
+                              link: _layerLink,
+                              child: IconButton(
+                                key: searchButtonKey,
+                                icon: const Icon(Icons.search, color: AppColors.cardLight),
+                                tooltip: "Search Students",
+                                onPressed: () => _showSearchOverlay(searchButtonKey),
+                              ),
+                            ),
+                          ),
+                        ]
+                      ),
                       SizedBox(
                         height: AppHelper.screenHeight(context)-190,
-                        child: Obx( () {
-                            if (studentController.isLoading.value) {
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.redAccent,
-                                ),
-                              );
-                            }
-                        
-                            if (studentController.allStudents.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const HintText(
-                                      text: "No student found",              
-                                    ),
-                                    const SizedBox(height: 20),
-                                    AddButton(onPressed: addStudent, tooltip: "Add Student",)
-                                  ],
-                                ),
-                              );
-                            }
-                            return ListView.builder(
-                              itemCount: studentController.allStudents.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index < studentController.allStudents.length) {
-                                  return _StudentTile(student: studentController.allStudents[index]);
-                                } else {
-                                  return AddButton(onPressed: addStudent, tooltip: "Add Student",);
-                                }
-                              } 
+                        child: Obx(() {
+                          final isLoading = studentController.isLoading.value;
+                          final students = studentController.filteredStudents;
+
+                          if (isLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.redAccent,
+                              ),
                             );
                           }
-                        ),
+                      
+                          if (students.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const HintText(
+                                    text: "No student found",              
+                                  ),
+                                  const SizedBox(height: 20),
+                                  AddButton(onPressed: addStudent, tooltip: "Add Student",)
+                                ],
+                              ),
+                            );
+                          }
+                          return ListView.builder(
+                            itemCount: students.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index < students.length) {
+                                return _StudentTile(student: students[index]);
+                              } else {
+                                return AddButton(onPressed: addStudent, tooltip: "Add Student",);
+                              }
+                            } 
+                          );
+                        }),
                       ),
                     ],
                   ),

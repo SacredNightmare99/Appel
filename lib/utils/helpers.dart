@@ -43,4 +43,10 @@ class AppHelper {
     return DateFormat('EEEE').format(date);
   }
 
+  static String formatTo12HourTime(TimeOfDay time) {
+    final now = DateTime.now();
+    final dateTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    return DateFormat('h:mma').format(dateTime).toLowerCase();
+  }
+
 }

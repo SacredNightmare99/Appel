@@ -9,6 +9,7 @@ class StudentController extends GetxController {
   var batchStudentMap = <String, RxList<Student>>{}.obs;
   var isLoading = false.obs;
   var isBatchLoading = false.obs;
+  var filteredStudents = <Student>[].obs;
 
   void selectStudent(Student student) {
     selectedStudent.value = student;
@@ -25,7 +26,6 @@ class StudentController extends GetxController {
           .toList();
     } catch (e) {
       debugPrint('Error fetching students: $e');
-      allStudents.clear(); // or keep previous data if needed
     } finally {
       isLoading.value = false;
     }
@@ -55,10 +55,21 @@ class StudentController extends GetxController {
     return batchStudentMap[batchUid]?.toList() ?? [];
   }
 
+  void filterStudentsByName(String query) {
+    if (query.isEmpty) {
+      filteredStudents.assignAll(allStudents);
+    } else {
+      filteredStudents.assignAll(
+        allStudents.where((student) => student.name.toLowerCase().contains(query.toLowerCase()))
+      );
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     refreshAllStudents();
+    ever(allStudents, (_) => filteredStudents.assignAll(allStudents));
   }
 
 }

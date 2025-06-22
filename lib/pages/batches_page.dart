@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 import 'package:the_project/backend/batch.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/batch_controller.dart';
@@ -12,6 +11,7 @@ import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
+import 'package:the_project/widgets/search_overlay.dart';
 
 class BatchesPage extends StatefulWidget {
   const BatchesPage({super.key});
@@ -37,12 +37,11 @@ class _BatchesPageState extends State<BatchesPage> {
   Widget build(BuildContext context) {
 
     final assignButtonKey = GlobalKey();
+    final searchButtonKey = GlobalKey();
 
-    String formatTo12HourTime(TimeOfDay time) {
-      final now = DateTime.now();
-      final dateTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      return DateFormat('h:mma').format(dateTime).toLowerCase();
-    }
+      final TextEditingController searchController = TextEditingController();
+      final LayerLink layerLink = LayerLink();
+      final FocusNode searchFocus = FocusNode();
 
     void addBatch() {
       showDialog(
@@ -162,6 +161,24 @@ class _BatchesPageState extends State<BatchesPage> {
       overlay.insert(entry);
     }
 
+    void showSearchOverlay(GlobalKey key) {
+      final overlay = Overlay.of(key.currentContext!);
+      late OverlayEntry searchOverlay;
+
+      searchOverlay = OverlayEntry(
+        builder: (context) => CustomSearchOverlay(
+          overlayEntry: searchOverlay,
+          searchController: searchController,
+          layerLink: layerLink,
+          searchFocus: searchFocus,
+          onChanged: (value) => batchController.filterBatchesByName(value),
+          hintText: "Search Batches...",
+        )
+      );
+
+      overlay.insert(searchOverlay);
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
@@ -178,7 +195,25 @@ class _BatchesPageState extends State<BatchesPage> {
                 child: InnerCard(
                   child: Column(
                     children: [
-                      CustomHeader(text: "Batches"),
+                      Stack(
+                        children: [
+                          CustomHeader(text: "Batches"),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: CompositedTransformTarget(
+                              link: layerLink,
+                              child: IconButton(
+                                key: searchButtonKey,
+                                icon: const Icon(Icons.search, color: AppColors.cardLight),
+                                tooltip: "Search Batches",
+                                onPressed: () => showSearchOverlay(searchButtonKey),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       SizedBox(
                         height: AppHelper.screenHeight(context) - 190,
                         child: Obx(() {
@@ -310,7 +345,7 @@ class _BatchesPageState extends State<BatchesPage> {
                                         ),
                                       ),
                                       Text(
-                                        "${formatTo12HourTime(selectedBatch.startTime)} to ${formatTo12HourTime(selectedBatch.endTime)}",
+                                        "${AppHelper.formatTo12HourTime(selectedBatch.startTime)} to ${AppHelper.formatTo12HourTime(selectedBatch.endTime)}",
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
