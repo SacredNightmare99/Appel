@@ -13,6 +13,7 @@ import 'package:the_project/widgets/calendar.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
+import 'package:the_project/widgets/search_overlay.dart';
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -26,10 +27,38 @@ class _AttendancePageState extends State<AttendancePage> {
   final attendanceController = Get.find<AttendanceController>();
   final batchController = Get.find<BatchController>();
   final studentController = Get.find<StudentController>();
+  final TextEditingController _searchController = TextEditingController();
+  final LayerLink _layerLink = LayerLink();
+  final FocusNode _searchFocus = FocusNode();
+  final searchButtonKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showSearchOverlay(GlobalKey key) {
+    final overlay = Overlay.of(key.currentContext!);
+    late OverlayEntry searchOverlay;
+
+    searchOverlay = OverlayEntry(
+      builder: (context) => CustomSearchOverlay(
+        overlayEntry: searchOverlay,
+        searchController: _searchController,
+        layerLink: _layerLink,
+        searchFocus: _searchFocus,
+        onChanged: (value) => studentController.filterStudentsByName(value),
+        hintText: "Search Students...",
+      )
+    );
+
+    overlay.insert(searchOverlay);
   }
 
   @override
@@ -151,11 +180,29 @@ class _AttendancePageState extends State<AttendancePage> {
                         child: InnerCard(
                           child: Column(
                             children: [
-                              CustomHeader(text: "Studentwise Attendance"),
+                              Stack(
+                                children: [
+                                  CustomHeader(text: "Studentwise Attendance"),
+                                  Positioned(
+                                    left: 0,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: CompositedTransformTarget(
+                                      link: _layerLink,
+                                      child: IconButton(
+                                        key: searchButtonKey,
+                                        icon: const Icon(Icons.search, color: AppColors.cardLight),
+                                        tooltip: "Search Students",
+                                        onPressed: () => _showSearchOverlay(searchButtonKey),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               SizedBox(
                                 height: (AppHelper.screenHeight(context) - 230) * 0.66,
                                 child: Obx(() {
-                                  final students = studentController.allStudents;
+                                  final students = studentController.filteredStudents;
                                   final isLoading = studentController.isLoading.value;
 
                                   if (isLoading) {

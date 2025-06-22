@@ -24,6 +24,12 @@ class _BatchesPageState extends State<BatchesPage> {
 
   final batchController = Get.find<BatchController>();
   final studentController = Get.find<StudentController>();
+  final assignButtonKey = GlobalKey();
+  final searchButtonKey = GlobalKey();
+
+  final TextEditingController searchController = TextEditingController();
+  final LayerLink layerLink = LayerLink();
+  final FocusNode searchFocus = FocusNode();
 
   @override
   void initState() {
@@ -34,14 +40,13 @@ class _BatchesPageState extends State<BatchesPage> {
   }
 
   @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    final assignButtonKey = GlobalKey();
-    final searchButtonKey = GlobalKey();
-
-      final TextEditingController searchController = TextEditingController();
-      final LayerLink layerLink = LayerLink();
-      final FocusNode searchFocus = FocusNode();
 
     void addBatch() {
       showDialog(
@@ -217,7 +222,7 @@ class _BatchesPageState extends State<BatchesPage> {
                       SizedBox(
                         height: AppHelper.screenHeight(context) - 190,
                         child: Obx(() {
-                          final batches = batchController.allBatches;
+                          final batches = batchController.filteredBatches;
                           final isLoading = batchController.isAllLoading.value;
 
                           if (isLoading) {
