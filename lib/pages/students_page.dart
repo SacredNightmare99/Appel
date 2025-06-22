@@ -41,6 +41,7 @@ class _StudentsPageState extends State<StudentsPage> {
 
   @override
   void dispose() {
+    _searchController.clear();
     _searchController.dispose();
     super.dispose();
   }

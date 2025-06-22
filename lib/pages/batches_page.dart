@@ -41,6 +41,7 @@ class _BatchesPageState extends State<BatchesPage> {
 
   @override
   void dispose() {
+    searchController.clear();
     searchController.dispose();
     super.dispose();
   }

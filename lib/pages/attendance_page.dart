@@ -39,6 +39,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
   @override
   void dispose() {
+    _searchController.clear();
     _searchController.dispose();
     super.dispose();
   }
