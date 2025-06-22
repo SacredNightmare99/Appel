@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:the_project/backend/attendance.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/attendance_controller.dart';
@@ -27,6 +26,9 @@ class _StudentsPageState extends State<StudentsPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      studentController.selectedStudent.value = null;
+    });
   }
 
   @override
@@ -192,9 +194,9 @@ class _StudentsPageState extends State<StudentsPage> {
                                         right: 0,
                                         child: IconButton(
                                           onPressed: () => removeStudent(selectedStudent),
-                                          icon: const Icon(Iconsax.minus_square),
+                                          icon: const Icon(Icons.delete_forever),
                                           color: AppColors.frenchRed, // French Red
-                                          iconSize: 20,
+                                          iconSize: 24,
                                           tooltip: "Remove Student",
                                         ),
                                       ),
@@ -250,12 +252,20 @@ class _StudentsPageState extends State<StudentsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Text( // TODO: Finish Attendance Data for a student
+                                      Text(
                                         "Classes Attended:",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.frenchBlue,
                                           fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${selectedStudent.classesPresent}/${selectedStudent.classes}",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
                                         ),
                                       ),
                                     ],

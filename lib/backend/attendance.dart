@@ -27,6 +27,13 @@ Future<void> markAttendanceForStudent(Student student, bool present, DateTime da
     'student_uid': student.uid,
   }));
 
+  await supabase.from('students')
+      .update({
+        'classes': student.classes+1,
+        'classes_present': present? student.classesPresent+1 : student.classesPresent,
+      })
+      .eq('uid', student.uid);
+
 }
 
 Future<bool> ifAttendanceMarked(DateTime date, Student student) async {

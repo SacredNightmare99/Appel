@@ -28,6 +28,9 @@ class _BatchesPageState extends State<BatchesPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      batchController.selectedBatch.value = null;
+    });
   }
 
   @override
@@ -254,9 +257,9 @@ class _BatchesPageState extends State<BatchesPage> {
                                         right: 0,
                                         child: IconButton(
                                           onPressed: () => removeBatch(selectedBatch),
-                                          icon: const Icon(Iconsax.minus_square),
+                                          icon: const Icon(Icons.delete_forever),
                                           color: AppColors.frenchRed, // French Red
-                                          iconSize: 20,
+                                          iconSize: 24,
                                           tooltip: "Remove Batch",
                                         ),
                                       ),

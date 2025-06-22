@@ -206,6 +206,7 @@ class _StudentTile extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final attendanceController = Get.find<AttendanceController>();
+    final studentController = Get.find<StudentController>();
 
     return FutureBuilder<bool>(
       future: ifAttendanceMarked(date, student),
@@ -217,7 +218,7 @@ class _StudentTile extends StatelessWidget {
           child: Stack(
             children: [
               Opacity(
-                opacity: alreadyMarked ? 0.7 : 1.0,
+                opacity: alreadyMarked ? 0.5 : 1.0,
                 child: IgnorePointer(
                   ignoring: alreadyMarked,
                   child: Material(
@@ -269,6 +270,7 @@ class _StudentTile extends StatelessWidget {
                                                 onPressed: () async {
                                                   setState(() => isLoading = true);
                                                   await markAttendanceForStudent(student, true, date);
+                                                  await studentController.refreshAllStudents();
                                                   attendanceController.triggerRefresh();
                                                   Get.back();
                                                 },
@@ -324,6 +326,7 @@ class _StudentTile extends StatelessWidget {
                                                 onPressed: () async {
                                                   setState(() => isLoading = true);
                                                   await markAttendanceForStudent(student, false, date);
+                                                  await studentController.refreshAllStudents();
                                                   attendanceController.triggerRefresh();
                                                   Get.back();
                                                 },

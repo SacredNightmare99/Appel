@@ -7,15 +7,18 @@ class Student {
   final String uid;
   final String? batchUid;
   final String? batchName;
-  final int classesAttended;
+  final int classes;
+  final int classesPresent;
 
-  const Student({required this.name, required this.uid, this.batchUid, this.batchName, this.classesAttended = 0});
+  const Student({required this.name, required this.uid, this.batchUid, this.batchName, this.classes = 0, this.classesPresent = 0});
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
       name: map['name'],
       uid: map['uid'],
       batchUid: map['batch_id'],
       batchName: map['batch_name'],
+      classes: map['classes'],
+      classesPresent: map['classes_present'],
     );
 
 }
