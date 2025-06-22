@@ -5,39 +5,21 @@ import 'package:the_project/backend/batch.dart';
 class Student {
   final String name;
   final String uid;
-  final String?  batchUid;
+  final String? batchUid;
+  final String? batchName;
   final int classesAttended;
 
-  const Student({required this.name, required this.uid, this.batchUid, this.classesAttended = 0});
+  const Student({required this.name, required this.uid, this.batchUid, this.batchName, this.classesAttended = 0});
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
       name: map['name'],
       uid: map['uid'],
       batchUid: map['batch_id'],
+      batchName: map['batch_name'],
     );
 
 }
 
-Stream<List<Student>> streamStudents() {
-  final supabase = Supabase.instance.client;
-  return supabase
-      .from('students')
-      .stream(primaryKey: ['uid'])
-      .map((data) => data
-          .map((item) => Student.fromMap(item))
-          .toList());
-}
-
-Stream<List<Student>> streamStudentsByBatch(String batchUid) {
-  final supabase = Supabase.instance.client;
-  return supabase
-      .from('students')
-      .stream(primaryKey: ['uid'])
-      .map((data) => data
-          .map((item) => Student.fromMap(item))
-          .where((student) => student.batchUid == batchUid)
-          .toList());
-}
 
 Future<void> insertStudent(String name) async {
   final supabase = Supabase.instance.client;
@@ -83,7 +65,10 @@ Future<void> assignStudentToBatch(Student student, Batch batch) async {
 
   await supabase
     .from('students')
-    .update({'batch_id': batch.uid})
+    .update({
+      'batch_id': batch.uid,
+      'batch_name': batch.name
+    })
     .eq('uid', student.uid);
   
 }
@@ -93,7 +78,10 @@ Future<void> unassignStudentFromBatch(Student student) async {
 
   await supabase
     .from('students')
-    .update({'batch_id': null})
+    .update({
+      'batch_id': null,
+      'batch_name': null,
+    })
     .eq('uid', student.uid);
 
 }

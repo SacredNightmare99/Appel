@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:the_project/pages/controllers/attendance_controller.dart';
+import 'package:the_project/pages/controllers/batch_controller.dart';
 import 'package:the_project/utils/helpers.dart';
 
 class CustomCalendar extends StatelessWidget {
@@ -9,9 +10,10 @@ class CustomCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final batchController = Get.find<BatchController>();
+    final attendanceController = Get.find<AttendanceController>();
+    final date = attendanceController.selectedDate.value ?? DateTime.now();
 
-    final controller = Get.find<AttendanceController>();
-    final date = controller.selectedDate.value ?? DateTime.now();
     return TableCalendar(
       key: ValueKey(date),
       focusedDay: date,
@@ -19,8 +21,9 @@ class CustomCalendar extends StatelessWidget {
       lastDay: DateTime(3000),
       shouldFillViewport: true,
       selectedDayPredicate: (day) => isSameDay(day, date),
-      onDaySelected: (selectedDay, focusedDay) {
-        controller.selectDate(focusedDay);
+      onDaySelected: (selectedDay, focusedDay) async {
+        attendanceController.selectDate(focusedDay);
+        await batchController.refreshDayBatches(AppHelper.getWeekdayName(focusedDay));
       },
       enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
       calendarStyle: CalendarStyle(
@@ -28,6 +31,7 @@ class CustomCalendar extends StatelessWidget {
         weekendTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), color: Colors.red),
         selectedTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), fontWeight: FontWeight.bold),
         todayTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), fontWeight: FontWeight.bold),
+        disabledTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), color: Colors.blueGrey),
         outsideDaysVisible: false
       ),
       daysOfWeekStyle: DaysOfWeekStyle(

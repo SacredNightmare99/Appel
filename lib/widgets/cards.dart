@@ -8,14 +8,19 @@ class OuterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(255, 208, 211, 219),
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(10),
-        side: BorderSide(width: 1)
+      color: const Color(0xFFF5F5F5), // Blanc – soft white background
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(
+          color: Color(0xFF0055A4), // Bleu border
+          width: 1.2,
+        ),
       ),
+      elevation: 3,
+      shadowColor: const Color(0x220055A4), // soft blue shadow
       child: Padding(
-        padding: EdgeInsetsGeometry.all(10),
-        child: child ?? SizedBox.shrink()
+        padding: const EdgeInsets.all(12),
+        child: child ?? const SizedBox.shrink(),
       ),
     );
   }
@@ -29,14 +34,19 @@ class InnerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(255, 235, 237, 243),
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(7),
-        side: BorderSide(width: 0.5)
+      color: const Color(0xFFEFF1F7), // lighter than OuterCard, soft bluish tint
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(
+          color: Color(0xFFEF4135), // Rouge border accent
+          width: 0.8,
+        ),
       ),
+      elevation: 1.5,
+      shadowColor: const Color(0x22EF4135), // soft red shadow
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: child ?? SizedBox.shrink(),
+        padding: const EdgeInsets.all(10),
+        child: child ?? const SizedBox.shrink(),
       ),
     );
   }

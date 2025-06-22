@@ -5,18 +5,33 @@ import 'package:intl/intl.dart';
 import 'package:the_project/backend/batch.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/pages/controllers/batch_controller.dart';
+import 'package:the_project/pages/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
+import 'package:the_project/widgets/custom_text.dart';
+import 'package:the_project/widgets/headers.dart';
 
-class BatchesPage extends StatelessWidget {
+class BatchesPage extends StatefulWidget {
   const BatchesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<BatchesPage> createState() => _BatchesPageState();
+}
 
-    final batchController = Get.put(BatchController());
+class _BatchesPageState extends State<BatchesPage> {
+
+  final batchController = Get.find<BatchController>();
+  final studentController = Get.find<StudentController>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     final assignButtonKey = GlobalKey();
 
@@ -120,6 +135,8 @@ class BatchesPage extends StatelessWidget {
                                 title: Text(student.name),
                                 onTap: () async {
                                   await assignStudentToBatch(student, batch);
+                                  await studentController.refreshBatchStudents(batch.uid);
+                                  await studentController.refreshAllStudents();
                                   entry.remove(); // close overlay
                                 },
                               );
@@ -138,7 +155,6 @@ class BatchesPage extends StatelessWidget {
       overlay.insert(entry);
     }
 
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
@@ -155,54 +171,45 @@ class BatchesPage extends StatelessWidget {
                 child: InnerCard(
                   child: Column(
                     children: [
-                      Center(child: const Text("Batches")),
-                      Divider(),
+                      CustomHeader(text: "Batches"),
                       SizedBox(
-                        height: AppHelper.screenHeight(context) - 168,
-                        child: StreamBuilder(
-                          stream: streamBatches(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.redAccent,
-                                ),
-                              );
-                            }
+                        height: AppHelper.screenHeight(context) - 190,
+                        child: Obx(() {
+                          final batches = batchController.allBatches;
+                          final isLoading = batchController.isAllLoading.value;
 
-                            if (snapshot.hasError) {
-                              debugPrint('Stream error: ${snapshot.error}');
-                              return const Center(child: Text("An error occurred while loading batches."));
-                            }
-                        
-                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text("No Batches found."),
-                                    const SizedBox(height: 20),
-                                    AddButton(onPressed: addBatch)
-                                  ],
-                                ),
-                              );
-                            }
-
-                            final batches = snapshot.data ?? [];
-
-                            return ListView.builder(
-                              itemCount: batches.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index < batches.length) {
-                                  return _BatchTile(batch: batches[index]);
-                                } else {
-                                  return AddButton(onPressed: addBatch);
-                                }
-                              }
+                          if (isLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.redAccent,
+                              ),
                             );
-                                
-                          },
-                        ),
+                          }
+                      
+                          if (batches.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const HintText(text: "No Batches found."),
+                                  const SizedBox(height: 20),
+                                  AddButton(onPressed: addBatch, tooltip: "Add Batch",)
+                                ],
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: batches.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index < batches.length) {
+                                return _BatchTile(batch: batches[index]);
+                              } else {
+                                return AddButton(onPressed: addBatch, tooltip: "Add Batch",);
+                              }
+                            }
+                          );
+                        }),
                       )
                     ],
                   ),
@@ -226,39 +233,104 @@ class BatchesPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              selectedBatch != null
-                            ? SizedBox(
+                              Container(
                                 width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.frenchBlue,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    topRight: Radius.circular(12),
+                                  ),
+                                ),
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    const Text(
-                                      "Batch Details",
-                                      textAlign: TextAlign.center,
+                                    TitleText(
+                                      text: "Batch Details",
                                     ),
-                                    Positioned(
-                                      right: 0,
-                                      child: IconButton(onPressed: () => removeBatch(selectedBatch), icon: Icon(Iconsax.minus_square, color: Colors.redAccent, size: 18,))
-                                    ),
+                                    if (selectedBatch != null)
+                                      Positioned(
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () => removeBatch(selectedBatch),
+                                          icon: const Icon(Iconsax.minus_square),
+                                          color: AppColors.frenchRed, // French Red
+                                          iconSize: 20,
+                                          tooltip: "Remove Batch",
+                                        ),
+                                      ),
                                   ],
                                 ),
-                              )
-                            : const Center(
-                                child: Text(
-                                  "Batch Details",
-                                  textAlign: TextAlign.center,
-                                ),
                               ),
-                              Divider(),
-                              selectedBatch == null ? Expanded(child: Center(child: const Text("Select a batch"),)) : 
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Name: ${selectedBatch.name}"),
-                                  Text("Timings: ${formatTo12HourTime(selectedBatch.startTime)} to ${formatTo12HourTime(selectedBatch.endTime)}"),
-                                  Text("Day: ${selectedBatch.day}"),
-                                ],
-                              )
+                              if (selectedBatch == null || batchController.isAllLoading.value)
+                                const Expanded(
+                                  child: Center(
+                                    child: HintText(
+                                      text: "Select a batch"
+                                    )
+                                  )
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Name:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        selectedBatch.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Timings:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${formatTo12HourTime(selectedBatch.startTime)} to ${formatTo12HourTime(selectedBatch.endTime)}",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Day:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        selectedBatch.day,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                )
                             ],
                           ),
                         ),
@@ -269,49 +341,42 @@ class BatchesPage extends StatelessWidget {
                         child: InnerCard(
                           child: Column(
                             children: [
-                              Center(child: const Text("Students"),),
-                              Divider(),
-                              selectedBatch == null? Expanded(child: Center(child: const Text("Select a batch"),)) :
+                              CustomHeader(text: "Students"),
+                              selectedBatch == null? const Expanded(child: Center(child: HintText(text: "Select a batch"),)) :
                               SizedBox(
-                                height: AppHelper.screenHeight(context) - 168,
-                                child: StreamBuilder(
-                                  stream: streamStudentsByBatch(selectedBatch.uid),
-                                  builder: (context, snapshot) {
+                                height: AppHelper.screenHeight(context) - 190,
+                                child: Obx(() {
+                                    final isLoading = studentController.isBatchLoading.value;
+                                    final students = studentController.getBatchStudents(selectedBatch.uid);
 
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                    if (isLoading) {
                                       return const Center(
                                         child: CircularProgressIndicator(
                                           color: Colors.redAccent,
                                         ),
                                       );
                                     }
-
-                                    if (snapshot.hasError) {
-                                      debugPrint('Stream error: ${snapshot.error}');
-                                      return const Center(child: Text("An error occurred while loading students."));
-                                    }
                                 
-                                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                    if (students.isEmpty) {
                                       return Center(
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            const Text("No Students assigned."),
+                                            const HintText(text: "No Students assigned"),
                                             const SizedBox(height: 20),
-                                            AddButton(key: assignButtonKey, onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch))
+                                            AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch))
                                           ],
                                         ),
                                       );
                                     }
-                                    
-                                    final students = snapshot.data ?? [];
+
                                     return ListView.builder(
                                       itemCount: students.length + 1,
                                       itemBuilder: (context, index) {
                                         if (index < students.length) {
                                           return _StudentTile(student: students[index]);
                                         } else {
-                                          return AddButton(key: assignButtonKey, onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch));
+                                          return AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch));
                                         }
                                       }
                                     );
@@ -346,17 +411,30 @@ class _BatchTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: InkWell(
-        onTap: () => controller.selectBatch(batch),
+        onTap: () { 
+          final studentController = Get.find<StudentController>();
+          studentController.refreshBatchStudents(batch.uid);
+          controller.selectBatch(batch);
+        },
         child: Material(
-          shape: BeveledRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(5),
-            side: const BorderSide(width: 1)
-          ),
-          child: Container(
-            margin: EdgeInsets.all(4),
-            padding: EdgeInsets.all(4),
-            child: Text(batch.name),
-          ),
+          color: AppColors.tileBackground,
+          borderRadius: BorderRadius.circular(6),
+          elevation: 1,
+          child: Obx(() { 
+            final selectedBatch = controller.selectedBatch.value;
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Text(
+                batch.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: (selectedBatch == null) ? AppColors.frenchBlue : (selectedBatch.name == batch.name) ? AppColors.frenchRed : AppColors.frenchBlue,
+                ),
+              ),
+            );
+          })
         ),
       ),
     );
@@ -371,24 +449,33 @@ class _StudentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
       child: Material(
-        shape: BeveledRectangleBorder(
-          borderRadius: BorderRadiusGeometry.circular(5),
-          side: const BorderSide(width: 1)
-        ),
+        color: AppColors.tileBackground,
+        borderRadius: BorderRadius.circular(6),
+        elevation: 1,
         child: Container(
-          margin: EdgeInsets.all(4),
-          padding: EdgeInsets.all(4),
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           child: Row(
             children: [
-              Text(student.name),
+              Text(
+                student.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               Spacer(),
               IconButton(
+                tooltip: "Unassign Student",
                 onPressed: () async {
+                  final studentController = Get.find<StudentController>();
+                  final batchUid = student.batchUid;
                   await unassignStudentFromBatch(student);
+                  await studentController.refreshBatchStudents(batchUid!);
+                  await studentController.refreshAllStudents();
                 }, 
-                icon: Icon(Iconsax.minus_square), color: Colors.redAccent,
+                icon: Icon(Iconsax.minus_square), color: AppColors.frenchRed,
               )
             ],
           ),

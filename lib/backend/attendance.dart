@@ -15,17 +15,6 @@ class Attendance {
       ); 
 }
 
-Stream<List<Attendance>> streamAttendanceForStudent(Student student) {
-  final supabase = Supabase.instance.client;
-  return supabase
-      .from('attendance')
-      .stream(primaryKey: ['uid'])
-      .eq('student_uid', student.uid)
-      .order('date')
-      .map((data) => data
-          .map((item) => Attendance.fromMap(item))
-          .toList());
-}
 
 Future<void> markAttendanceForStudent(Student student, bool present, DateTime date) async {
   final supabase = Supabase.instance.client;

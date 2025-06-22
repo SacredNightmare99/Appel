@@ -2,28 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:the_project/backend/attendance.dart';
-import 'package:the_project/backend/batch.dart';
 import 'package:the_project/backend/student.dart';
+import 'package:the_project/pages/controllers/attendance_controller.dart';
 import 'package:the_project/pages/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
+import 'package:the_project/widgets/custom_text.dart';
+import 'package:the_project/widgets/headers.dart';
 
-class StudentsPage extends StatelessWidget {
+class StudentsPage extends StatefulWidget {
   const StudentsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<StudentsPage> createState() => _StudentsPageState();
+}
 
-    final studentController = Get.put(StudentController());
+class _StudentsPageState extends State<StudentsPage> {
+
+  final studentController = Get.find<StudentController>();
+  final attendanceController = Get.find<AttendanceController>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     void addStudent() {
       final nameController = TextEditingController();
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Add Student"),
+          title: Text("Add Student", style: TextStyle(color: AppColors.frenchBlue),),
           content: TextField(
             controller: nameController,
             decoration: InputDecoration(
@@ -40,9 +54,13 @@ class StudentsPage extends StatelessWidget {
                 final name = nameController.text.trim();
                 if (name.isNotEmpty) {
                   await insertStudent(name);
+                  await studentController.refreshAllStudents();
                   Get.back();
                 }
               }, 
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.frenchBlue
+              ),
               child: const Text("Add"),
             )
           ],
@@ -54,7 +72,7 @@ class StudentsPage extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Confirm Delete"),
+          title: Text("Confirm Delete", style: TextStyle(color: AppColors.frenchRed),),
           content: Text("Are you sure you want to delete ${student.name}?"),
           actions: [
             TextButton(
@@ -64,9 +82,11 @@ class StudentsPage extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 await deleteStudent(student.uid);
+                await studentController.refreshAllStudents();
                 studentController.selectedStudent.value = null;
                 Get.back();
               },
+              style: TextButton.styleFrom(foregroundColor: AppColors.frenchRed),
               child: const Text("Delete"),
             ),
           ],
@@ -91,14 +111,11 @@ class StudentsPage extends StatelessWidget {
                 child: InnerCard(
                   child: Column(
                     children: [
-                      Center(child: const Text("Students"),),
-                      Divider(),
+                      CustomHeader(text: "Students"),
                       SizedBox(
-                        height: AppHelper.screenHeight(context)-168,
-                        child: StreamBuilder(
-                          stream: streamStudents(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                        height: AppHelper.screenHeight(context)-190,
+                        child: Obx( () {
+                            if (studentController.isLoading.value) {
                               return const Center(
                                 child: CircularProgressIndicator(
                                   color: Colors.redAccent,
@@ -106,32 +123,27 @@ class StudentsPage extends StatelessWidget {
                               );
                             }
                         
-                            if (snapshot.hasError) {
-                              debugPrint('Stream error: ${snapshot.error}');
-                              return const Center(child: Text("An error occurred while loading students."));
-                            }
-                        
-                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            if (studentController.allStudents.isEmpty) {
                               return Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text("No Students found."),
+                                    const HintText(
+                                      text: "No student found",              
+                                    ),
                                     const SizedBox(height: 20),
-                                    AddButton(onPressed: addStudent)
+                                    AddButton(onPressed: addStudent, tooltip: "Add Student",)
                                   ],
                                 ),
                               );
                             }
-                                      
-                            final students = snapshot.data ?? [];
                             return ListView.builder(
-                              itemCount: students.length + 1,
+                              itemCount: studentController.allStudents.length + 1,
                               itemBuilder: (context, index) {
-                                if (index < students.length) {
-                                  return _StudentTile(student: students[index]);
+                                if (index < studentController.allStudents.length) {
+                                  return _StudentTile(student: studentController.allStudents[index]);
                                 } else {
-                                  return AddButton(onPressed: addStudent);
+                                  return AddButton(onPressed: addStudent, tooltip: "Add Student",);
                                 }
                               } 
                             );
@@ -157,56 +169,98 @@ class StudentsPage extends StatelessWidget {
                         flex: 2,
                         child: InnerCard(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              selectedStudent != null
-                            ? SizedBox(
+                              Container(
                                 width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.frenchBlue,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    topRight: Radius.circular(12),
+                                  ),
+                                ),
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    const Text(
-                                      "Student Details",
-                                      textAlign: TextAlign.center,
+                                    TitleText(
+                                      text: "Student Details",
                                     ),
-                                    Positioned(
-                                      right: 0,
-                                      child: IconButton(onPressed: () => removeStudent(selectedStudent), icon: Icon(Iconsax.minus_square, color: Colors.redAccent, size: 18,))
-                                    ),
+                                    if (selectedStudent != null)
+                                      Positioned(
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () => removeStudent(selectedStudent),
+                                          icon: const Icon(Iconsax.minus_square),
+                                          color: AppColors.frenchRed, // French Red
+                                          iconSize: 20,
+                                          tooltip: "Remove Student",
+                                        ),
+                                      ),
                                   ],
                                 ),
-                              )
-                            : const Center(
-                                child: Text(
-                                  "Student Details",
-                                  textAlign: TextAlign.center,
-                                ),
                               ),
-                              Divider(),
-                              selectedStudent == null? Expanded(child: Center(child: const Text("Select a Student"),)) : 
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text("Name: ${selectedStudent.name}"),
-                                  FutureBuilder(
-                                    future: getBatchForStudent(selectedStudent.batchUid ?? ""),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasError) {
-                                        return Text('Error: ${snapshot.error}');
-                                      }
-                                      final batch = snapshot.data;
-
-                                      if (batch == null) {
-                                        return const Text('Batch: No batch assigned');
-                                      }
-
-                                      return Text("Batch: ${batch.name}");
-                                    }
+                              const SizedBox(height: 12),
+                              if (selectedStudent == null || studentController.isLoading.value)
+                                const Expanded(
+                                  child: Center(
+                                    child: HintText(
+                                      text:"Select a Student",
+                                    ),
                                   ),
-                                ],
-                              ),
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Name:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        selectedStudent.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Batch:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        selectedStudent.batchName ?? "No batch assigned",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text( // TODO: Finish Attendance Data for a student
+                                        "Classes Attended:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.frenchBlue,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -217,37 +271,52 @@ class StudentsPage extends StatelessWidget {
                         child: InnerCard(
                           child: Column(
                             children: [
-                              const Text("Attendance"),
-                              Divider(),
-                              selectedStudent == null ? Expanded(child: const Center(child: Text("Attendance will be shown after a Student has been selected"),)) : SizedBox(
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.frenchBlue,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    topRight: Radius.circular(12)
+                                  )
+                                ),
+                                child: Center(
+                                  child: TitleText(
+                                    text: "Attendance",
+                                  ),
+                                ),
+                              ),
+                              selectedStudent == null ? 
+                              const Expanded(
+                                child: Center(
+                                  child: HintText(
+                                    text: "Attendance will be shown after a Student has been selected",
+                                  )
+                                )
+                              ) 
+                            : SizedBox(
                                 height: AppHelper.screenHeight(context) - 188,
-                                child: StreamBuilder(
-                                  stream: streamAttendanceForStudent(studentController.selectedStudent.value!),
-                                  builder: (context, snapshot) {
-                          
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator(
-                                          color: Colors.redAccent,
-                                        ),
-                                      );
-                                    }
-                          
-                                    if (snapshot.hasError) {
-                                      debugPrint('Stream error: ${snapshot.error}');
-                                      return const Center(child: Text("An error occurred while loading attendance."));
-                                    }
-                          
-                                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                      return const Center(child: Text("No attendance found."));
-                                    }
-                          
-                                    final attendance = snapshot.data!;
-                                    return ListView.builder(
-                                      itemCount: attendance.length,
-                                      itemBuilder: (context, index) => _AttendanceTile(attendance: attendance[index],)
+                                child: Obx( () {
+                                  final isLoading = attendanceController.isLoading.value;
+                                  final records = attendanceController.attendance;
+
+                                  if (isLoading) {
+                                    return const Center(child: CircularProgressIndicator(
+                                        color: Colors.redAccent,
+                                      ),
                                     );
                                   }
-                                ),
+                        
+                                  if (records.isEmpty) {
+                                    return const Center(child: HintText(text: "No attendance found."));
+                                  }
+
+                                  return ListView.builder(
+                                    itemCount: records.length,
+                                    itemBuilder: (context, index) => _AttendanceTile(attendance: records[index],)
+                                  );
+                                }),
                               ),
                             ],
                           )
@@ -266,53 +335,58 @@ class StudentsPage extends StatelessWidget {
 }
 
 class _AttendanceTile extends StatelessWidget {
-
   final Attendance attendance;
 
   const _AttendanceTile({required this.attendance});
 
   @override
   Widget build(BuildContext context) {
-   
-    return Material(
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(4)
-      ),
-      child: Container(
-        color: Colors.white,
-        margin: EdgeInsets.all(4),
-        padding: EdgeInsets.all(4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(AppHelper.formatDate(attendance.date)),
-            Text.rich(
-              TextSpan(
-                children: attendance.present
-                    ? [
-                        const TextSpan(
-                          text: 'P',
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                        ),
-                        const TextSpan(
-                          text: 'resent',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ]
-                    : [
-                        const TextSpan(
-                          text: 'A',
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                        ),
-                        const TextSpan(
-                          text: 'bsent',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ],
+    return Container(
+      margin: EdgeInsets.all(6),
+      child: Material(
+        elevation: 1,
+        color: AppColors.tileBackground,
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(AppHelper.formatDate(attendance.date)),
+              Text.rich(
+                TextSpan(
+                  children: attendance.present
+                      ? [
+                          TextSpan(
+                            text: 'P',
+                            style: TextStyle(
+                              color: AppColors.frenchBlue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: 'resent',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ]
+                      : [
+                          TextSpan(
+                            text: 'A',
+                            style: TextStyle(
+                              color: AppColors.frenchRed,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: 'bsent',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -326,23 +400,37 @@ class _StudentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StudentController>();
-
+    
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
       child: InkWell(
-        onTap: () => controller.selectStudent(student),
+        onTap: () { 
+          controller.selectStudent(student);
+          final attendanceController = Get.find<AttendanceController>();
+          attendanceController.fetchAttendanceForStudent(student);
+        },
         child: Material(
-          shape: BeveledRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(5),
-            side: const BorderSide(width: 1)
-          ),
-          child: Container(
-            margin: EdgeInsets.all(4),
-            padding: EdgeInsets.all(4),
-            child: Text(student.name),
-          ),
+          color: AppColors.tileBackground,
+          borderRadius: BorderRadius.circular(6),
+          elevation: 1,
+          child: Obx(() { 
+            final selectedStudent = controller.selectedStudent.value;
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Text(
+                student.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: (selectedStudent == null) ? AppColors.frenchBlue : (selectedStudent.name == student.name) ? AppColors.frenchRed : AppColors.frenchBlue,
+                ),
+              ),
+            );
+          })
         ),
       ),
     );
   }
 }
+

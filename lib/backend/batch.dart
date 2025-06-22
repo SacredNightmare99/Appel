@@ -4,11 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class Batch {
   final String name;
   final String uid;
-  final String? day;
+  final String day;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
 
-  const Batch({required this.name, required this.uid, this.day, required this.endTime, required this.startTime});
+  const Batch({required this.name, required this.uid, required this.day, required this.endTime, required this.startTime});
 
   factory Batch.fromMap(Map<String, dynamic> map) {
 
@@ -26,47 +26,6 @@ class Batch {
     );
   }
 
-}
-
-Future<Batch?> getBatchForStudent(String batchUid) async {
-  final supabase = Supabase.instance.client;
-  if (batchUid.isEmpty) {
-    return null;
-  }
-
-  final data = await supabase
-      .from('batches')
-      .select()
-      .eq('batch_uid', batchUid)
-      .maybeSingle();
-
-  if (data == null) return null;
-
-  return Batch.fromMap(data);
-}
-
-Stream<List<Batch>> streamBatches() {
-  final supabase = Supabase.instance.client;
-
-  return supabase.from("batches")
-      .stream(primaryKey: ['batch_uid'])
-      .order('start_time')
-      .map((data) => data
-            .map((item) => Batch.fromMap(item))
-            .toList());
-}
-
-Stream<List<Batch>> streamBatchesByDay(String day) {
-  final supabase = Supabase.instance.client;
-
-  return supabase
-      .from('batches')
-      .stream(primaryKey: ['batch_uid'])
-      .eq('day', day)
-      .order('start_time')
-      .map((data) => data
-          .map((item) => Batch.fromMap(item))
-          .toList());
 }
 
 Future<void> insertBatch({

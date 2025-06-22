@@ -25,7 +25,7 @@ class CustomNavigationBar extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.red : Colors.white,
+                color: isActive ? AppColors.frenchRed : Colors.white,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -34,7 +34,7 @@ class CustomNavigationBar extends StatelessWidget {
 
         return Container(
           height: 60,
-          color: AppColors.navbar,
+          color: AppColors.frenchBlue,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [

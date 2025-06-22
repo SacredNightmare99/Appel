@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AppHelper {
   const AppHelper._();
@@ -36,6 +37,10 @@ class AppHelper {
     final month = months[date.month - 1];
     final year = date.year;
     return '$day$suffix $month, $year';
+  }
+
+  static String getWeekdayName(DateTime date) {
+    return DateFormat('EEEE').format(date);
   }
 
 }
