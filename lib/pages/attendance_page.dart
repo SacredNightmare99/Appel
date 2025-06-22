@@ -266,19 +266,22 @@ class _StudentTile extends StatelessWidget {
                                       actions: isLoading
                                           ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
                                           : [
-                                              TextButton(
+                                              ElevatedButton(
                                                 onPressed: () async {
                                                   setState(() => isLoading = true);
                                                   await markAttendanceForStudent(student, true, date);
                                                   await studentController.refreshAllStudents();
                                                   attendanceController.triggerRefresh();
                                                   Get.back();
-                                                },
-                                                child: const Text("Yes"),
+                                                }, 
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: AppColors.frenchBlue
+                                                ),
+                                                child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
                                               ),
                                               TextButton(
                                                 onPressed: () => Get.back(),
-                                                child: const Text("Cancel"),
+                                                child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
                                               ),
                                             ],
                                     ),
@@ -322,19 +325,22 @@ class _StudentTile extends StatelessWidget {
                                       actions: isLoading
                                           ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
                                           : [
-                                              TextButton(
+                                              ElevatedButton(
                                                 onPressed: () async {
                                                   setState(() => isLoading = true);
                                                   await markAttendanceForStudent(student, false, date);
                                                   await studentController.refreshAllStudents();
                                                   attendanceController.triggerRefresh();
                                                   Get.back();
-                                                },
-                                                child: const Text("Yes"),
+                                                }, 
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: AppColors.frenchBlue
+                                                ),
+                                                child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
                                               ),
                                               TextButton(
                                                 onPressed: () => Get.back(),
-                                                child: const Text("Cancel"),
+                                                child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
                                               ),
                                             ],
                                     ),

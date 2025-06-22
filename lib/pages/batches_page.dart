@@ -55,21 +55,25 @@ class _BatchesPageState extends State<BatchesPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Confirm Delete"),
+          title: const Text("Confirm Delete", style: TextStyle(color: AppColors.frenchBlue),),
           content: Text("Are you sure you want to delete ${batch.name}?"),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text("Cancel"),
+              child: const Text("Cancel", style: TextStyle(color: AppColors.frenchBlue),),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
                 await deleteBatch(batch.uid);
+                await batchController.refreshAllBatches();
                 batchController.selectedBatch.value = null;
                 Get.back();
-              },
-              child: const Text("Delete"),
-            ),
+              }, 
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.frenchRed
+              ),
+              child: const Text("Delete", style: TextStyle(color: AppColors.cardLight),),
+            )
           ],
         ),
       );
@@ -433,7 +437,7 @@ class _BatchTile extends StatelessWidget {
                 batch.name,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: (selectedBatch == null) ? AppColors.frenchBlue : (selectedBatch.name == batch.name) ? AppColors.frenchRed : AppColors.frenchBlue,
+                  color: (selectedBatch == null) ? AppColors.frenchBlue : (selectedBatch.uid == batch.uid) ? AppColors.frenchRed : AppColors.frenchBlue,
                 ),
               ),
             );
@@ -498,6 +502,8 @@ class _AddBatchDialog extends StatelessWidget {
     TimeOfDay? endTime;
     String? selectedDay;
 
+    final batchController = Get.find<BatchController>();
+
     return StatefulBuilder(
       builder: (context, setState) => AlertDialog(
         title: const Text("Add Batch"),
@@ -516,10 +522,14 @@ class _AddBatchDialog extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.access_time),
+                      icon: const Icon(Icons.access_time, color: AppColors.frenchBlue,),
                       label: Text(startTime == null
                           ? "Start Time"
-                          : startTime!.format(context)),
+                          : startTime!.format(context),
+                          style: TextStyle(
+                            color: AppColors.frenchBlue
+                          ),
+                        ),
                       onPressed: () async {
                         final picked = await showTimePicker(
                           context: context,
@@ -534,10 +544,14 @@ class _AddBatchDialog extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.access_time_filled),
+                      icon: const Icon(Icons.access_time_filled, color: AppColors.frenchBlue,),
                       label: Text(endTime == null
                           ? "End Time"
-                          : endTime!.format(context)),
+                          : endTime!.format(context),
+                          style: TextStyle(
+                            color: AppColors.frenchBlue
+                          ),
+                        ),
                       onPressed: () async {
                         final picked = await showTimePicker(
                           context: context,
@@ -579,7 +593,12 @@ class _AddBatchDialog extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppColors.frenchRed
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -594,10 +613,19 @@ class _AddBatchDialog extends StatelessWidget {
                   endTime: endTime!,
                   day: selectedDay!,
                 );
+                await batchController.refreshAllBatches();
                 Get.back();
               }
             },
-            child: const Text("Add"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.frenchBlue
+            ),
+            child: const Text(
+              "Add",
+              style: TextStyle(
+                color: AppColors.cardLight
+              ),  
+            ),
           ),
         ],
       ),

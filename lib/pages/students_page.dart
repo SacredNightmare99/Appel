@@ -48,8 +48,8 @@ class _StudentsPageState extends State<StudentsPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(), 
-              child: const Text('Cancel')
+              onPressed: () => Get.back(), 
+              child: const Text('Cancel', style: TextStyle(color: AppColors.frenchRed),)
             ),
             ElevatedButton(
               onPressed: () async {
@@ -63,7 +63,7 @@ class _StudentsPageState extends State<StudentsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.frenchBlue
               ),
-              child: const Text("Add"),
+              child: const Text("Add", style: TextStyle(color: AppColors.cardLight),),
             )
           ],
         )
@@ -79,18 +79,20 @@ class _StudentsPageState extends State<StudentsPage> {
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text("Cancel"),
+              child: const Text("Cancel", style: TextStyle(color: AppColors.frenchBlue)),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
                 await deleteStudent(student.uid);
                 await studentController.refreshAllStudents();
                 studentController.selectedStudent.value = null;
                 Get.back();
-              },
-              style: TextButton.styleFrom(foregroundColor: AppColors.frenchRed),
-              child: const Text("Delete"),
-            ),
+              }, 
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.frenchRed
+              ),
+              child: const Text("Delete", style: TextStyle(color: AppColors.cardLight),),
+            )
           ],
         ),
       );
