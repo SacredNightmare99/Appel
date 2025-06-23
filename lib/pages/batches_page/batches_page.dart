@@ -187,261 +187,264 @@ class _BatchesPageState extends State<BatchesPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Container(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          spacing: 10,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // List of Batches
-            Expanded(
-              flex: 1,
-              child: OuterCard(
-                child: InnerCard(
-                  child: Column(
-                    children: [
-                      Stack(
-                        children: [
-                          CustomHeader(text: "Batches"),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            child: CompositedTransformTarget(
-                              link: layerLink,
-                              child: IconButton(
-                                key: searchButtonKey,
-                                icon: const Icon(Icons.search, color: AppColors.cardLight),
-                                tooltip: "Search Batches",
-                                onPressed: () => showSearchOverlay(searchButtonKey),
+      body: SingleChildScrollView(
+        child: Container(
+          height: 880,
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            spacing: 10,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // List of Batches
+              Expanded(
+                flex: 1,
+                child: OuterCard(
+                  child: InnerCard(
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: [
+                            CustomHeader(text: "Batches"),
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              bottom: 0,
+                              child: CompositedTransformTarget(
+                                link: layerLink,
+                                child: IconButton(
+                                  key: searchButtonKey,
+                                  icon: const Icon(Icons.search, color: AppColors.cardLight),
+                                  tooltip: "Search Batches",
+                                  onPressed: () => showSearchOverlay(searchButtonKey),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: AppHelper.screenHeight(context) - 190,
-                        child: Obx(() {
-                          final batches = batchController.filteredBatches;
-                          final isLoading = batchController.isAllLoading.value;
-
-                          if (isLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.redAccent,
-                              ),
-                            );
-                          }
-                      
-                          if (batches.isEmpty) {
-                            return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const HintText(text: "No Batches found."),
-                                  const SizedBox(height: 20),
-                                  AddButton(onPressed: addBatch, tooltip: "Add Batch",)
-                                ],
-                              ),
-                            );
-                          }
-
-                          return ListView.builder(
-                            itemCount: batches.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index < batches.length) {
-                                return _BatchTile(batch: batches[index]);
-                              } else {
-                                return AddButton(onPressed: addBatch, tooltip: "Add Batch",);
-                              }
+                          ],
+                        ),
+                        SizedBox(
+                          height: 750,
+                          child: Obx(() {
+                            final batches = batchController.filteredBatches;
+                            final isLoading = batchController.isAllLoading.value;
+        
+                            if (isLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.redAccent,
+                                ),
+                              );
                             }
-                          );
-                        }),
-                      )
-                    ],
+                        
+                            if (batches.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const HintText(text: "No Batches found."),
+                                    const SizedBox(height: 20),
+                                    AddButton(onPressed: addBatch, tooltip: "Add Batch",)
+                                  ],
+                                ),
+                              );
+                            }
+        
+                            return ListView.builder(
+                              itemCount: batches.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index < batches.length) {
+                                  return _BatchTile(batch: batches[index]);
+                                } else {
+                                  return AddButton(onPressed: addBatch, tooltip: "Add Batch",);
+                                }
+                              }
+                            );
+                          }),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Batch Details
-            Expanded(
-              flex: 5,
-              child: OuterCard(
-                child: Obx(() { 
-                  final selectedBatch = batchController.selectedBatch.value;
-                  return Row(
-                    spacing: 5,
-                    children: [
-                      // Details
-                      Expanded(
-                        flex: 5,
-                        child: InnerCard(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: AppColors.frenchBlue,
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
-                                  ),
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    TitleText(
-                                      text: "Batch Details",
+              // Batch Details
+              Expanded(
+                flex: 5,
+                child: OuterCard(
+                  child: Obx(() { 
+                    final selectedBatch = batchController.selectedBatch.value;
+                    return Row(
+                      spacing: 5,
+                      children: [
+                        // Details
+                        Expanded(
+                          flex: 5,
+                          child: InnerCard(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.frenchBlue,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
                                     ),
-                                    if (selectedBatch != null)
-                                      Positioned(
-                                        right: 0,
-                                        child: IconButton(
-                                          onPressed: () => removeBatch(selectedBatch),
-                                          icon: const Icon(Icons.delete_forever),
-                                          color: AppColors.frenchRed, // French Red
-                                          iconSize: 24,
-                                          tooltip: "Remove Batch",
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (selectedBatch == null || batchController.isAllLoading.value)
-                                const Expanded(
-                                  child: Center(
-                                    child: HintText(
-                                      text: "Select a batch"
-                                    )
-                                  )
-                                )
-                              else
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
-                                      Text(
-                                        "Name:",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.frenchBlue,
-                                          fontSize: 14,
-                                        ),
+                                      TitleText(
+                                        text: "Batch Details",
                                       ),
-                                      Text(
-                                        selectedBatch.name,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
+                                      if (selectedBatch != null)
+                                        Positioned(
+                                          right: 0,
+                                          child: IconButton(
+                                            onPressed: () => removeBatch(selectedBatch),
+                                            icon: const Icon(Icons.delete_forever),
+                                            color: AppColors.frenchRed, // French Red
+                                            iconSize: 24,
+                                            tooltip: "Remove Batch",
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "Timings:",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.frenchBlue,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Text(
-                                        "${AppHelper.formatTo12HourTime(selectedBatch.startTime)} to ${AppHelper.formatTo12HourTime(selectedBatch.endTime)}",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "Day:",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.frenchBlue,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Text(
-                                        selectedBatch.day,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
                                     ],
                                   ),
-                                )
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Students
-                      Expanded(
-                        flex: 1,
-                        child: InnerCard(
-                          child: Column(
-                            children: [
-                              CustomHeader(text: "Students"),
-                              selectedBatch == null? const Expanded(child: Center(child: HintText(text: "Select a batch"),)) :
-                              SizedBox(
-                                height: AppHelper.screenHeight(context) - 190,
-                                child: Obx(() {
-                                    final isLoading = studentController.isBatchLoading.value;
-                                    final students = studentController.getBatchStudents(selectedBatch.uid);
-
-                                    if (isLoading) {
-                                      return const Center(
-                                        child: CircularProgressIndicator(
-                                          color: Colors.redAccent,
-                                        ),
-                                      );
-                                    }
-                                
-                                    if (students.isEmpty) {
-                                      return Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const HintText(text: "No Students assigned"),
-                                            const SizedBox(height: 20),
-                                            AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch))
-                                          ],
-                                        ),
-                                      );
-                                    }
-
-                                    return ListView.builder(
-                                      itemCount: students.length + 1,
-                                      itemBuilder: (context, index) {
-                                        if (index < students.length) {
-                                          return _StudentTile(student: students[index]);
-                                        } else {
-                                          return AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch));
-                                        }
-                                      }
-                                    );
-                                  },
                                 ),
-                              )
-                            ],
+                                if (selectedBatch == null || batchController.isAllLoading.value)
+                                  const Expanded(
+                                    child: Center(
+                                      child: HintText(
+                                        text: "Select a batch"
+                                      )
+                                    )
+                                  )
+                                else
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Name:",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.frenchBlue,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Text(
+                                          selectedBatch.name,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "Timings:",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.frenchBlue,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${AppHelper.formatTo12HourTime(selectedBatch.startTime)} to ${AppHelper.formatTo12HourTime(selectedBatch.endTime)}",
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "Day:",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.frenchBlue,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Text(
+                                          selectedBatch.day,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                      ],
+                                    ),
+                                  )
+                              ],
+                            ),
                           ),
                         ),
-                      )
-                    ],
-                  );
-                }
-                )
-              ),
-            )
-          ],
+                        // Students
+                        Expanded(
+                          flex: 1,
+                          child: InnerCard(
+                            child: Column(
+                              children: [
+                                CustomHeader(text: "Students"),
+                                selectedBatch == null? const Expanded(child: Center(child: HintText(text: "Select a batch"),)) :
+                                SizedBox(
+                                  height: 750,
+                                  child: Obx(() {
+                                      final isLoading = studentController.isBatchLoading.value;
+                                      final students = studentController.getBatchStudents(selectedBatch.uid);
+        
+                                      if (isLoading) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.redAccent,
+                                          ),
+                                        );
+                                      }
+                                  
+                                      if (students.isEmpty) {
+                                        return Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const HintText(text: "No Students assigned"),
+                                              const SizedBox(height: 20),
+                                              AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch))
+                                            ],
+                                          ),
+                                        );
+                                      }
+        
+                                      return ListView.builder(
+                                        itemCount: students.length + 1,
+                                        itemBuilder: (context, index) {
+                                          if (index < students.length) {
+                                            return _StudentTile(student: students[index]);
+                                          } else {
+                                            return AddButton(key: assignButtonKey, tooltip: "Assign Student", onPressed: () => showAssignOverlay(assignButtonKey, selectedBatch));
+                                          }
+                                        }
+                                      );
+                                    },
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  }
+                  )
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

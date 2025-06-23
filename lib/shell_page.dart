@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:the_project/pages/about_page.dart';
-import 'package:the_project/pages/attendance_page.dart';
-import 'package:the_project/pages/batches_page.dart';
+import 'package:the_project/pages/attendance_page/attendance_page.dart';
+import 'package:the_project/pages/batches_page/batches_page.dart';
 import 'package:the_project/pages/home_page.dart';
-import 'package:the_project/pages/students_page.dart';
+import 'package:the_project/pages/students_page/students_page.dart';
+import 'package:the_project/utils/colors.dart';
 import 'package:the_project/widgets/custom_navbar.dart';
+import 'package:the_project/widgets/responsive_layout.dart';
 
 class ShellPage extends StatelessWidget {
   const ShellPage({super.key});
@@ -15,6 +17,14 @@ class ShellPage extends StatelessWidget {
 
     final navController = Get.find<NavController>();
 
+    return ResponsiveLayout(
+      mobile: _buildMobile(navController), 
+      desktop: _buildDesktop(navController)
+    );
+
+  }
+
+  Widget _buildDesktop(NavController navController) {
     return Column(
       children: [
         CustomNavigationBar(),
@@ -32,12 +42,54 @@ class ShellPage extends StatelessWidget {
                 page: () => _getPageRouteBuilder(settings.name ?? '/home'),
               );
             },
-          )
-        )
+          ),
+        ),
       ],
     );
   }
+
+  Widget _buildMobile(NavController navController) {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        title: const Text("Learn French With Anuj", style: TextStyle(color: Colors.white),),
+        backgroundColor: AppColors.frenchBlue,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () => scaffoldKey.currentState?.openDrawer(),
+        ),
+      ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: CustomNavigationBar(
+            isVertical: true,
+            onLinkPressed: () {
+              scaffoldKey.currentState?.closeDrawer();
+            },
+          ),
+        ),
+      ),
+      body: Navigator(
+        key: Get.nestedKey(1),
+        initialRoute: '/home',
+        onGenerateRoute: (settings) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            navController.updateRoute(settings.name ?? '/home');
+          });
+
+          return GetPageRoute(
+            settings: settings,
+            page: () => _getPageRouteBuilder(settings.name ?? '/home'),
+          );
+        },
+      ),
+    );
+  }
+
 }
+
 
 Widget _getPageRouteBuilder(String? route) {
   switch (route) {

@@ -67,178 +67,181 @@ class _AttendancePageState extends State<AttendancePage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Container(
-        padding: const EdgeInsets.all(10),
-        child: Obx(() {
-          DateTime date = attendanceController.selectedDate.value ?? DateTime.now();
-          bool isDayWise = attendanceController.isDayWise.value;
-          
-          return OuterCard(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 5,
-              children: [
-                // Batchwise
-                Expanded(
-                  flex: 3,
-                  child: InnerCard(
-                    child: Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(bottom: 2),
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: AppColors.frenchBlue,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              topRight: Radius.circular(12),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: TitleText(text: "Batchwise Attendance")
+      body: SingleChildScrollView(
+        child: Container(
+          height: 880,
+          padding: const EdgeInsets.all(10),
+          child: Obx(() {
+            DateTime date = attendanceController.selectedDate.value ?? DateTime.now();
+            bool isDayWise = attendanceController.isDayWise.value;
+            
+            return OuterCard(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 5,
+                children: [
+                  // Batchwise
+                  Expanded(
+                    flex: 3,
+                    child: InnerCard(
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(bottom: 2),
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: AppColors.frenchBlue,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
                               ),
-                              SizedBox(width: 12,),
-                              Tooltip(
-                                message: "Change Batch View",
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.frenchRed
-                                  ),
-                                  onPressed: () async {
-                                    attendanceController.toggleDayWise();
-                                    if (attendanceController.isDayWise.value) {
-                                      await batchController.refreshDayBatches(AppHelper.getWeekdayName(date));
-                                    } else {
-                                      await batchController.refreshAllBatches();
-                                    }
-                                  },
-                                  child: Text(
-                                    isDayWise? "Day wise" : "All Batches",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: TitleText(text: "Batchwise Attendance")
+                                ),
+                                SizedBox(width: 12,),
+                                Tooltip(
+                                  message: "Change Batch View",
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.frenchRed
+                                    ),
+                                    onPressed: () async {
+                                      attendanceController.toggleDayWise();
+                                      if (attendanceController.isDayWise.value) {
+                                        await batchController.refreshDayBatches(AppHelper.getWeekdayName(date));
+                                      } else {
+                                        await batchController.refreshAllBatches();
+                                      }
+                                    },
+                                    child: Text(
+                                      isDayWise? "Day wise" : "All Batches",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                            ],
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 16,),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Obx(() {
+                                final batches = isDayWise? batchController.dayBatches : batchController.allBatches;
+                                final isLoading = isDayWise? batchController.isDayLoading.value : batchController.isAllLoading.value;
+                                if (isLoading) {
+                                  return const Center(child: CircularProgressIndicator(color: Colors.redAccent));
+                                }
+        
+                                if (batches.isEmpty) {
+                                  return const Center(child: HintText(text: "No Batches found."));
+                                }
+        
+                                return Obx ( () {
+                                  attendanceController.refreshTrigger.value;  
+                                  return Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: List.generate(
+                                      batches.length,
+                                      (index) => _BatchTile(batch: batches[index], date: date),
+                                    ),
+                                  );
+                                });
+                              }),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 5,
+                      children: [
+                        // Calendar
+                        Expanded(
+                          flex: 1,
+                          child: InnerCard(
+                            child: CustomCalendar()
                           ),
                         ),
-                        SizedBox(height: 16,),
+                        // Studentwise
                         Expanded(
-                          child: SingleChildScrollView(
-                            child: Obx(() {
-                              final batches = isDayWise? batchController.dayBatches : batchController.allBatches;
-                              final isLoading = isDayWise? batchController.isDayLoading.value : batchController.isAllLoading.value;
-                              if (isLoading) {
-                                return const Center(child: CircularProgressIndicator(color: Colors.redAccent));
-                              }
-
-                              if (batches.isEmpty) {
-                                return const Center(child: HintText(text: "No Batches found."));
-                              }
-
-                              return Obx ( () {
-                                attendanceController.refreshTrigger.value;  
-                                return Wrap(
-                                  spacing: 10,
-                                  runSpacing: 10,
-                                  children: List.generate(
-                                    batches.length,
-                                    (index) => _BatchTile(batch: batches[index], date: date),
-                                  ),
-                                );
-                              });
-                            }),
+                          flex: 2,
+                          child: InnerCard(
+                            child: Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    CustomHeader(text: "Studentwise Attendance"),
+                                    Positioned(
+                                      left: 0,
+                                      top: 0,
+                                      bottom: 0,
+                                      child: CompositedTransformTarget(
+                                        link: _layerLink,
+                                        child: IconButton(
+                                          key: searchButtonKey,
+                                          icon: const Icon(Icons.search, color: AppColors.cardLight),
+                                          tooltip: "Search Students",
+                                          onPressed: () => _showSearchOverlay(searchButtonKey),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 470,
+                                  child: Obx(() {
+                                    final students = studentController.filteredStudents;
+                                    final isLoading = studentController.isLoading.value;
+        
+                                    if (isLoading) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.redAccent,
+                                        ),
+                                      );
+                                    }
+                                
+                                    if (students.isEmpty) {
+                                      return const Center(child: Text("No Students found."));
+                                    }
+                                    
+                                    return Obx( () {
+                                      attendanceController.refreshTrigger.value; 
+                                      return ListView.builder(
+                                        itemCount: students.length,
+                                        itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
+                                      ); 
+                                    });
+                                  }),
+                                )
+                              ],
+                            ),
                           ),
                         )
                       ],
                     ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 5,
-                    children: [
-                      // Calendar
-                      Expanded(
-                        flex: 1,
-                        child: InnerCard(
-                          child: CustomCalendar()
-                        ),
-                      ),
-                      // Studentwise
-                      Expanded(
-                        flex: 2,
-                        child: InnerCard(
-                          child: Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  CustomHeader(text: "Studentwise Attendance"),
-                                  Positioned(
-                                    left: 0,
-                                    top: 0,
-                                    bottom: 0,
-                                    child: CompositedTransformTarget(
-                                      link: _layerLink,
-                                      child: IconButton(
-                                        key: searchButtonKey,
-                                        icon: const Icon(Icons.search, color: AppColors.cardLight),
-                                        tooltip: "Search Students",
-                                        onPressed: () => _showSearchOverlay(searchButtonKey),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: (AppHelper.screenHeight(context) - 230) * 0.66,
-                                child: Obx(() {
-                                  final students = studentController.filteredStudents;
-                                  final isLoading = studentController.isLoading.value;
-
-                                  if (isLoading) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Colors.redAccent,
-                                      ),
-                                    );
-                                  }
-                              
-                                  if (students.isEmpty) {
-                                    return const Center(child: Text("No Students found."));
-                                  }
-                                  
-                                  return Obx( () {
-                                    attendanceController.refreshTrigger.value; 
-                                    return ListView.builder(
-                                      itemCount: students.length,
-                                      itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
-                                    ); 
-                                  });
-                                }),
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-          }
-        )
+                  )
+                ],
+              ),
+            );
+            }
+          )
+        ),
       )
     );
   }
@@ -458,8 +461,8 @@ class _BatchTileState extends State<_BatchTile> {
         borderRadius: BorderRadius.circular(12),
         elevation: 1,
         child: SizedBox(
-          width: (AppHelper.screenWidth(context)/5).clamp(300, 600),
-          height: AppHelper.screenHeight(context)/3,
+          width: 500,
+          height: 400,
           child: Column(
             children: [
               Container(
@@ -494,7 +497,7 @@ class _BatchTileState extends State<_BatchTile> {
                 ),
               ),
               SizedBox(
-                height: AppHelper.screenHeight(context)/4,
+                height: 360,
                 child: Obx(() {
                   final students = studentController.getBatchStudents(widget.batch.uid);
                   final isLoading = studentController.isBatchLoading.value;

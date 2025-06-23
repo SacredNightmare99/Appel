@@ -42,6 +42,7 @@ class CustomCalendar extends StatelessWidget {
         titleTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 14), fontWeight: FontWeight.w600),
         formatButtonTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
       ),
+      availableCalendarFormats: const {CalendarFormat.month: ''},
     );
   }
 }

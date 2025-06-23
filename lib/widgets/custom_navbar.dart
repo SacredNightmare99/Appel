@@ -6,7 +6,10 @@ import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:the_project/utils/colors.dart';
 
 class CustomNavigationBar extends StatelessWidget {
-  const CustomNavigationBar({super.key});
+  final bool isVertical;
+  final void Function()? onLinkPressed;
+
+  const CustomNavigationBar({super.key, this.isVertical = false, this.onLinkPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -20,31 +23,48 @@ class CustomNavigationBar extends StatelessWidget {
             onPressed: () {
               if (!isActive) {
                 Get.toNamed(route, id: 1);
+                onLinkPressed?.call();
               }
             },
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isActive ? AppColors.frenchRed : Colors.white,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            child: Align(
+              alignment: isVertical? Alignment.centerLeft : Alignment.center,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: isVertical? 18 : 16,
+                  color: isActive ? AppColors.frenchRed : Colors.white,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
           );
         }
 
-        return Container(
-          height: 60,
-          color: AppColors.frenchBlue,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              buildNavButton('Home', '/home'),
-              buildNavButton('Attendance', '/attendance'),
-              buildNavButton('Batches', '/batches'),
-              buildNavButton('Students', '/students'),
-              buildNavButton('About', '/about'),
-            ],
-          ),
+        final navButtons = [
+          buildNavButton('Home', '/home'),
+          buildNavButton('Attendance', '/attendance'),
+          buildNavButton('Batches', '/batches'),
+          buildNavButton('Students', '/students'),
+          buildNavButton('About', '/about'),
+        ];
+
+        return isVertical 
+        ? Container(
+            color: AppColors.frenchBlue,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: navButtons,
+            ),
+          )
+        : Container(
+            height: 60,
+            color: AppColors.frenchBlue,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: navButtons,
+            ),
         );
       },
     );
