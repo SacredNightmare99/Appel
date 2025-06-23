@@ -12,16 +12,16 @@ class ResponsiveLayout extends StatelessWidget {
   });
 
   static bool isMobile(BuildContext context) =>
-      AppHelper.screenWidth(context) < 600;
+      AppHelper.screenWidth(context) < 650;
 
   static bool isDesktop(BuildContext context) =>
-      AppHelper.screenWidth(context) >= 600;
+      AppHelper.screenWidth(context) >= 650;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, constraints) {
-        if (constraints.maxWidth < 600) {
+        if (constraints.maxWidth < 650) {
           return mobile;
         } else {
           return desktop;

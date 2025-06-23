@@ -7,6 +7,7 @@ class CustomSearchOverlay extends StatelessWidget {
   final FocusNode searchFocus;
   final void Function(String)? onChanged;
   final String hintText;
+  final Offset offset;
 
   const CustomSearchOverlay({
     super.key, 
@@ -15,7 +16,8 @@ class CustomSearchOverlay extends StatelessWidget {
     required this.searchController, 
     required this.searchFocus, 
     required this.onChanged,
-    required this.hintText
+    required this.hintText,
+    required this.offset
   });
 
   @override
@@ -32,13 +34,13 @@ class CustomSearchOverlay extends StatelessWidget {
             ),
             CompositedTransformFollower(
               link: layerLink,
-              offset: Offset(5, -10),
+              offset: offset,
               showWhenUnlinked: false,
               child: Material(
                 elevation: 4,
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 5, top: 2, bottom: 2),
+                  padding: const EdgeInsets.only(left: 10, top: 2, bottom: 2),
                   width: 250,
                   height: 50,
                   decoration: BoxDecoration(

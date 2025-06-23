@@ -27,9 +27,9 @@ class _BatchesPageState extends State<BatchesPage> {
   final assignButtonKey = GlobalKey();
   final searchButtonKey = GlobalKey();
 
-  final TextEditingController searchController = TextEditingController();
-  final LayerLink layerLink = LayerLink();
-  final FocusNode searchFocus = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  final LayerLink _layerLink = LayerLink();
+  final FocusNode _searchFocus = FocusNode();
 
   @override
   void initState() {
@@ -37,12 +37,15 @@ class _BatchesPageState extends State<BatchesPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       batchController.selectedBatch.value = null;
     });
+    _searchController.addListener(() {
+      studentController.filterStudentsByName(_searchController.text);
+    });
   }
 
   @override
   void dispose() {
-    searchController.clear();
-    searchController.dispose();
+    _searchController.clear();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -174,11 +177,12 @@ class _BatchesPageState extends State<BatchesPage> {
       searchOverlay = OverlayEntry(
         builder: (context) => CustomSearchOverlay(
           overlayEntry: searchOverlay,
-          searchController: searchController,
-          layerLink: layerLink,
-          searchFocus: searchFocus,
+          searchController: _searchController,
+          layerLink: _layerLink,
+          searchFocus: _searchFocus,
           onChanged: (value) => batchController.filterBatchesByName(value),
           hintText: "Search Batches...",
+          offset: Offset(0, 0),
         )
       );
 
@@ -211,7 +215,7 @@ class _BatchesPageState extends State<BatchesPage> {
                               top: 0,
                               bottom: 0,
                               child: CompositedTransformTarget(
-                                link: layerLink,
+                                link: _layerLink,
                                 child: IconButton(
                                   key: searchButtonKey,
                                   icon: const Icon(Icons.search, color: AppColors.cardLight),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:the_project/pages/about_page.dart';
-import 'package:the_project/pages/attendance_page/attendance_page.dart';
-import 'package:the_project/pages/batches_page/batches_page.dart';
+import 'package:the_project/pages/attendance_page.dart';
+import 'package:the_project/pages/batches_page.dart';
 import 'package:the_project/pages/home_page.dart';
-import 'package:the_project/pages/students_page/students_page.dart';
+import 'package:the_project/pages/students_page.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/widgets/custom_navbar.dart';
 import 'package:the_project/widgets/responsive_layout.dart';

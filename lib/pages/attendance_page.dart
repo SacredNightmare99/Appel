@@ -35,6 +35,9 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      studentController.filterStudentsByName(_searchController.text);
+    });
   }
 
   @override
@@ -56,6 +59,7 @@ class _AttendancePageState extends State<AttendancePage> {
         searchFocus: _searchFocus,
         onChanged: (value) => studentController.filterStudentsByName(value),
         hintText: "Search Students...",
+        offset: Offset(0, 0),
       )
     );
 
