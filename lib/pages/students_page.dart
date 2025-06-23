@@ -183,7 +183,6 @@ class _StudentsPageState extends State<StudentsPage> {
             return const SizedBox.shrink();
           }
         })
-        
       ],
     );
   }
@@ -461,7 +460,6 @@ class _StudentsPageState extends State<StudentsPage> {
       }),
     );
   }
-
 }
 
 class _AttendanceTile extends StatelessWidget {
