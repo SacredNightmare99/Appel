@@ -27,20 +27,20 @@ class CustomCalendar extends StatelessWidget {
       },
       enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
       calendarStyle: CalendarStyle(
-        defaultTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
-        weekendTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), color: Colors.red),
-        selectedTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), fontWeight: FontWeight.bold),
-        todayTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), fontWeight: FontWeight.bold),
-        disabledTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12), color: Colors.blueGrey),
+        defaultTextStyle: TextStyle(fontSize: 12),
+        weekendTextStyle: TextStyle(fontSize: 12, color: Colors.red),
+        selectedTextStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        todayTextStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        disabledTextStyle: TextStyle(fontSize: 12, color: Colors.blueGrey),
         outsideDaysVisible: false
       ),
       daysOfWeekStyle: DaysOfWeekStyle(
-        weekdayStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
-        weekendStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
+        weekdayStyle: TextStyle(fontSize: 12),
+        weekendStyle: TextStyle(fontSize: 12),
       ),
       headerStyle: HeaderStyle(
-        titleTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 14), fontWeight: FontWeight.w600),
-        formatButtonTextStyle: TextStyle(fontSize: AppHelper.responsiveSize(context, 12)),
+        titleTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, overflow: TextOverflow.ellipsis),
+        formatButtonTextStyle: TextStyle(fontSize: 12),
       ),
       availableCalendarFormats: const {CalendarFormat.month: ''},
     );

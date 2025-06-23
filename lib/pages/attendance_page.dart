@@ -13,6 +13,7 @@ import 'package:the_project/widgets/calendar.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
+import 'package:the_project/widgets/responsive_layout.dart';
 import 'package:the_project/widgets/search_overlay.dart';
 
 class AttendancePage extends StatefulWidget {
@@ -59,7 +60,7 @@ class _AttendancePageState extends State<AttendancePage> {
         searchFocus: _searchFocus,
         onChanged: (value) => studentController.filterStudentsByName(value),
         hintText: "Search Students...",
-        offset: Offset(0, 0),
+        offset: Offset(100, 0),
       )
     );
 
@@ -68,187 +69,225 @@ class _AttendancePageState extends State<AttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Container(
-          height: 880,
-          padding: const EdgeInsets.all(10),
-          child: Obx(() {
-            DateTime date = attendanceController.selectedDate.value ?? DateTime.now();
-            bool isDayWise = attendanceController.isDayWise.value;
-            
-            return OuterCard(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 5,
-                children: [
-                  // Batchwise
-                  Expanded(
-                    flex: 3,
-                    child: InnerCard(
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(bottom: 2),
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: AppColors.frenchBlue,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                topRight: Radius.circular(12),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Center(
-                                  child: TitleText(text: "Batchwise Attendance")
-                                ),
-                                SizedBox(width: 12,),
-                                Tooltip(
-                                  message: "Change Batch View",
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.frenchRed
-                                    ),
-                                    onPressed: () async {
-                                      attendanceController.toggleDayWise();
-                                      if (attendanceController.isDayWise.value) {
-                                        await batchController.refreshDayBatches(AppHelper.getWeekdayName(date));
-                                      } else {
-                                        await batchController.refreshAllBatches();
-                                      }
-                                    },
-                                    child: Text(
-                                      isDayWise? "Day wise" : "All Batches",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 16,),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Obx(() {
-                                final batches = isDayWise? batchController.dayBatches : batchController.allBatches;
-                                final isLoading = isDayWise? batchController.isDayLoading.value : batchController.isAllLoading.value;
-                                if (isLoading) {
-                                  return const Center(child: CircularProgressIndicator(color: Colors.redAccent));
-                                }
-        
-                                if (batches.isEmpty) {
-                                  return const Center(child: HintText(text: "No Batches found."));
-                                }
-        
-                                return Obx ( () {
-                                  attendanceController.refreshTrigger.value;  
-                                  return Wrap(
-                                    spacing: 10,
-                                    runSpacing: 10,
-                                    children: List.generate(
-                                      batches.length,
-                                      (index) => _BatchTile(batch: batches[index], date: date),
-                                    ),
-                                  );
-                                });
-                              }),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 5,
-                      children: [
-                        // Calendar
-                        Expanded(
-                          flex: 1,
-                          child: InnerCard(
-                            child: CustomCalendar()
-                          ),
-                        ),
-                        // Studentwise
-                        Expanded(
-                          flex: 2,
-                          child: InnerCard(
-                            child: Column(
-                              children: [
-                                Stack(
-                                  children: [
-                                    CustomHeader(text: "Studentwise Attendance"),
-                                    Positioned(
-                                      left: 0,
-                                      top: 0,
-                                      bottom: 0,
-                                      child: CompositedTransformTarget(
-                                        link: _layerLink,
-                                        child: IconButton(
-                                          key: searchButtonKey,
-                                          icon: const Icon(Icons.search, color: AppColors.cardLight),
-                                          tooltip: "Search Students",
-                                          onPressed: () => _showSearchOverlay(searchButtonKey),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 470,
-                                  child: Obx(() {
-                                    final students = studentController.filteredStudents;
-                                    final isLoading = studentController.isLoading.value;
-        
-                                    if (isLoading) {
-                                      return const Center(
-                                        child: CircularProgressIndicator(
-                                          color: Colors.redAccent,
-                                        ),
-                                      );
-                                    }
-                                
-                                    if (students.isEmpty) {
-                                      return const Center(child: Text("No Students found."));
-                                    }
-                                    
-                                    return Obx( () {
-                                      attendanceController.refreshTrigger.value; 
-                                      return ListView.builder(
-                                        itemCount: students.length,
-                                        itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
-                                      ); 
-                                    });
-                                  }),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-            }
-          )
-        ),
+      body: ResponsiveLayout(
+        mobile: _buildMobileLayout(), 
+        desktop: _buildDesktopLayout()
       )
     );
   }
+
+  Widget _buildMobileLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: OuterCard(
+        child: Obx( () {
+          DateTime date = attendanceController.selectedDate.value ?? DateTime.now();
+          return ListView(
+            children: [
+              InnerCard(
+                child: SizedBox(
+                  height: 300,
+                  child: CustomCalendar()
+                ),
+              ),
+              const SizedBox(height: 12,),
+              _buildStudentWise(date),
+              const SizedBox(height: 12,),
+              //_buildBatchwise(date)
+            ],
+          );
+        })
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return SingleChildScrollView(
+      child: Container(
+        height: 880,
+        padding: const EdgeInsets.all(10),
+        child: Obx(() {
+          DateTime date = attendanceController.selectedDate.value ?? DateTime.now();
+          return OuterCard(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 5,
+              children: [
+                // Batchwise
+                Expanded(
+                  flex: 3,
+                  child: _buildBatchwise(date)
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 5,
+                    children: [
+                      // Calendar
+                      Expanded(
+                        flex: 1,
+                        child: InnerCard(
+                          child: CustomCalendar()
+                        ),
+                      ),
+                      // Studentwise
+                      Expanded(
+                        flex: 2,
+                        child: _buildStudentWise(date)
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
+          }
+        )
+      ),
+    );
+  }
+
+  Widget _buildBatchwise(DateTime date) {
+    bool isDayWise = attendanceController.isDayWise.value;
+    return InnerCard(
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 2),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.frenchBlue,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: TitleText(text: "Batchwise Attendance")
+                ),
+                SizedBox(width: 12,),
+                Tooltip(
+                  message: "Change Batch View",
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.frenchRed
+                    ),
+                    onPressed: () async {
+                      attendanceController.toggleDayWise();
+                      if (attendanceController.isDayWise.value) {
+                        await batchController.refreshDayBatches(AppHelper.getWeekdayName(date));
+                      } else {
+                        await batchController.refreshAllBatches();
+                      }
+                    },
+                    child: Text(
+                      isDayWise? "Day wise" : "All Batches",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 16,),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Obx(() {
+                final batches = isDayWise? batchController.dayBatches : batchController.allBatches;
+                final isLoading = isDayWise? batchController.isDayLoading.value : batchController.isAllLoading.value;
+                if (isLoading) {
+                  return const Center(child: CircularProgressIndicator(color: Colors.redAccent));
+                }
+
+                if (batches.isEmpty) {
+                  return const Center(child: HintText(text: "No Batches found."));
+                }
+
+                return Obx ( () {
+                  attendanceController.refreshTrigger.value;  
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: List.generate(
+                      batches.length,
+                      (index) => _BatchTile(batch: batches[index], date: date),
+                    ),
+                  );
+                });
+              }),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudentWise(DateTime date) {
+    return InnerCard(
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CustomHeader(text: "Studentwise Attendance"),
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: CompositedTransformTarget(
+                  link: _layerLink,
+                  child: IconButton(
+                    key: searchButtonKey,
+                    icon: const Icon(Icons.search, color: AppColors.cardLight),
+                    tooltip: "Search Students",
+                    onPressed: () => _showSearchOverlay(searchButtonKey),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 470,
+            child: Obx(() {
+              final students = studentController.filteredStudents;
+              final isLoading = studentController.isLoading.value;
+
+              if (isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.redAccent,
+                  ),
+                );
+              }
+          
+              if (students.isEmpty) {
+                return const Center(child: HintText(text: "No Students found."));
+              }
+              
+              return Obx( () {
+                attendanceController.refreshTrigger.value; 
+                return ListView.builder(
+                  itemCount: students.length,
+                  itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
+                ); 
+              });
+            }),
+          )
+        ],
+      ),
+    );
+  }
+
 }
 
 class _StudentTile extends StatelessWidget {
@@ -285,125 +324,142 @@ class _StudentTile extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       child: Row(
                         children: [
-                          Text(student.name),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  bool isLoading = false;
-                                  return StatefulBuilder(
-                                    builder: (context, setState) => AlertDialog(
-                                      title: Text.rich(
-                                        TextSpan(
-                                          text: 'Mark ',
-                                          children: [
-                                            TextSpan(
-                                              text: student.name,
-                                              style: const TextStyle(color: Colors.blueAccent),
-                                            ),
-                                            const TextSpan(text: ' as '),
-                                            const TextSpan(
-                                              text: 'present',
-                                              style: TextStyle(color: Colors.blueAccent),
-                                            ),
-                                            const TextSpan(text: ' for '),
-                                            TextSpan(
-                                              text: AppHelper.formatDate(date),
-                                              style: const TextStyle(color: Colors.blueAccent),
-                                            ),
-                                            const TextSpan(text: '?'),
-                                          ],
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                      actions: isLoading
-                                          ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
-                                          : [
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  setState(() => isLoading = true);
-                                                  await markAttendanceForStudent(student, true, date);
-                                                  await studentController.refreshAllStudents();
-                                                  attendanceController.triggerRefresh();
-                                                  Get.back();
-                                                }, 
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: AppColors.frenchBlue
-                                                ),
-                                                child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
-                                              ),
-                                              TextButton(
-                                                onPressed: () => Get.back(),
-                                                child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
-                                              ),
-                                            ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            icon: const Icon(Iconsax.tick_square, color: Colors.blueAccent),
+                          Flexible(
+                            child: Text(
+                              student.name,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  bool isLoading = false;
-                                  return StatefulBuilder(
-                                    builder: (context, setState) => AlertDialog(
-                                      title: Text.rich(
-                                        TextSpan(
-                                          text: 'Mark ',
-                                          children: [
+
+                          const SizedBox(width: 8,),
+                          
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      bool isLoading = false;
+                                      return StatefulBuilder(
+                                        builder: (context, setState) => AlertDialog(
+                                          title: Text.rich(
                                             TextSpan(
-                                              text: student.name,
-                                              style: const TextStyle(color: Colors.blueAccent),
-                                            ),
-                                            const TextSpan(text: ' as '),
-                                            const TextSpan(
-                                              text: 'absent',
-                                              style: TextStyle(color: Colors.redAccent),
-                                            ),
-                                            const TextSpan(text: ' for '),
-                                            TextSpan(
-                                              text: AppHelper.formatDate(date),
-                                              style: const TextStyle(color: Colors.blueAccent),
-                                            ),
-                                            const TextSpan(text: '?'),
-                                          ],
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                      actions: isLoading
-                                          ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
-                                          : [
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  setState(() => isLoading = true);
-                                                  await markAttendanceForStudent(student, false, date);
-                                                  await studentController.refreshAllStudents();
-                                                  attendanceController.triggerRefresh();
-                                                  Get.back();
-                                                }, 
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: AppColors.frenchBlue
+                                              text: 'Mark ',
+                                              children: [
+                                                TextSpan(
+                                                  text: student.name,
+                                                  style: const TextStyle(color: Colors.blueAccent),
                                                 ),
-                                                child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
-                                              ),
-                                              TextButton(
-                                                onPressed: () => Get.back(),
-                                                child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
-                                              ),
-                                            ],
-                                    ),
+                                                const TextSpan(text: ' as '),
+                                                const TextSpan(
+                                                  text: 'present',
+                                                  style: TextStyle(color: Colors.blueAccent),
+                                                ),
+                                                const TextSpan(text: ' for '),
+                                                TextSpan(
+                                                  text: AppHelper.formatDate(date),
+                                                  style: const TextStyle(color: Colors.blueAccent),
+                                                ),
+                                                const TextSpan(text: '?'),
+                                              ],
+                                              style: const TextStyle(color: Colors.black),
+                                            ),
+                                          ),
+                                          actions: isLoading
+                                              ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
+                                              : [
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      setState(() => isLoading = true);
+                                                      await markAttendanceForStudent(student, true, date);
+                                                      await studentController.refreshAllStudents();
+                                                      attendanceController.triggerRefresh();
+                                                      Get.back();
+                                                    }, 
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: AppColors.frenchBlue
+                                                    ),
+                                                    child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Get.back(),
+                                                    child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
+                                                  ),
+                                                ],
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                            icon: const Icon(Iconsax.close_square, color: Colors.redAccent),
+                                icon: const Icon(Iconsax.tick_square, color: Colors.blueAccent),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      bool isLoading = false;
+                                      return StatefulBuilder(
+                                        builder: (context, setState) => AlertDialog(
+                                          title: Text.rich(
+                                            TextSpan(
+                                              text: 'Mark ',
+                                              children: [
+                                                TextSpan(
+                                                  text: student.name,
+                                                  style: const TextStyle(color: Colors.blueAccent),
+                                                ),
+                                                const TextSpan(text: ' as '),
+                                                const TextSpan(
+                                                  text: 'absent',
+                                                  style: TextStyle(color: Colors.redAccent),
+                                                ),
+                                                const TextSpan(text: ' for '),
+                                                TextSpan(
+                                                  text: AppHelper.formatDate(date),
+                                                  style: const TextStyle(color: Colors.blueAccent),
+                                                ),
+                                                const TextSpan(text: '?'),
+                                              ],
+                                              style: const TextStyle(color: Colors.black),
+                                            ),
+                                          ),
+                                          actions: isLoading
+                                              ? [const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())]
+                                              : [
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      setState(() => isLoading = true);
+                                                      await markAttendanceForStudent(student, false, date);
+                                                      await studentController.refreshAllStudents();
+                                                      attendanceController.triggerRefresh();
+                                                      Get.back();
+                                                    }, 
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: AppColors.frenchBlue
+                                                    ),
+                                                    child: const Text("Yes", style: TextStyle(color: AppColors.cardLight),),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Get.back(),
+                                                    child: const Text("Cancel", style: TextStyle(color: AppColors.frenchRed),),
+                                                  ),
+                                                ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Iconsax.close_square, color: Colors.redAccent),
+                              ),
+                            ],
                           ),
                         ],
                       ),
