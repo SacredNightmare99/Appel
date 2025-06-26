@@ -71,86 +71,110 @@ class _BatchesPageState extends State<BatchesPage> {
     final overlay = Overlay.of(key.currentContext!);
     final renderBox = key.currentContext!.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
 
     final unassignedStudents = await getUnassignedStudents();
 
     late OverlayEntry entry;
 
-    entry = OverlayEntry(
-      builder: (context) => GestureDetector(
-        onTap: () => entry.remove(), // dismiss when tapped outside
-        behavior: HitTestBehavior.translucent,
-        child: Stack(
-          children: [
-            // Transparent backdrop to catch outside taps
-            Positioned.fill(
-              child: Container(
-                color: Colors.transparent // optional subtle background
-              ),
-            ),
+    // Initial position of the draggable popup
+    Offset offset = Offset(position.dx - 250, position.dy - 200);
 
-            // The popup card
-            Positioned(
-              top: position.dy + size.height + 8,
-              left: position.dx - 150,
-              width: 300,
-              child: Material(
-                elevation: 12,
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Text(
-                        "Assign Student",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+    entry = OverlayEntry(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return GestureDetector(
+            onTap: () => entry.remove(), // dismiss when tapped outside
+            behavior: HitTestBehavior.translucent,
+            child: Stack(
+              children: [
+                // Transparent backdrop to catch outside taps
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.transparent // optional subtle background
+                  ),
+                ),
+          
+                // The popup card
+                Positioned(
+                  top: offset.dy,
+                  left: offset.dx,
+                  width: 300,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        offset += details.delta;
+                      });
+                    },
+                    child: Material(
+                      elevation: 12,
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: 400, // Adjust as needed
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                                color: AppColors.frenchBlue,
+                              ),
+                              child: Text(
+                                "Assign Student",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const Divider(height: 0),
+                            if (unassignedStudents.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Text("No unassigned students"),
+                              ) 
+                            else
+                              Flexible(
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.all(10),
+                                  shrinkWrap: true,
+                                  itemCount: unassignedStudents.length,
+                                  itemBuilder: (context, index) {
+                                    final student = unassignedStudents[index];
+                                    return ListTile(
+                                      title: Text(student.name),
+                                      onTap: () async {
+                                        await assignStudentToBatch(student, batch);
+                                        await studentController.refreshBatchStudents(batch.uid);
+                                        await studentController.refreshAllStudents();
+                                        entry.remove(); // close overlay
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                    const Divider(height: 0),
-                    if (unassignedStudents.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text("No unassigned students"),
-                      ) 
-                    else
-                      Flexible(
-                        child: ListView.builder(
-                          padding: const EdgeInsets.all(10),
-                          shrinkWrap: true,
-                          itemCount: unassignedStudents.length,
-                          itemBuilder: (context, index) {
-                            final student = unassignedStudents[index];
-                            return ListTile(
-                              title: Text(student.name),
-                              onTap: () async {
-                                await assignStudentToBatch(student, batch);
-                                await studentController.refreshBatchStudents(batch.uid);
-                                await studentController.refreshAllStudents();
-                                entry.remove(); // close overlay
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        }
       ),
     );
 
     overlay.insert(entry);
   }
 
-  void _showSearchOverlay(GlobalKey key) {
+  void _showSearchOverlayBatch(GlobalKey key) {
     final overlay = Overlay.of(key.currentContext!);
     late OverlayEntry searchOverlay;
 
@@ -261,7 +285,7 @@ class _BatchesPageState extends State<BatchesPage> {
                       key: searchButtonKey,
                       icon: const Icon(Icons.search, color: AppColors.cardLight),
                       tooltip: "Search Batches",
-                      onPressed: () => _showSearchOverlay(searchButtonKey),
+                      onPressed: () => _showSearchOverlayBatch(searchButtonKey),
                     ),
                   ),
                 ),
