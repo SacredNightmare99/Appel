@@ -1,0 +1,39 @@
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
+class GeminiService {
+  static final String _apiKey = dotenv.env['GeminiAPI']!;
+  static final String _endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$_apiKey';
+
+  static Future<String> getResponse({
+    required String userPrompt,
+    required String contextData,
+  }) async {
+    final fullPrompt = "$userPrompt\n\nContext Data:\n$contextData";
+
+    final response = await http.post(
+      Uri.parse(_endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "contents": [
+          {
+            "parts": [
+              {"text": fullPrompt}
+            ]
+          }
+        ]
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['candidates'][0]['content']['parts'][0]['text'] ?? "No response.";
+    } else {
+      print("Gemini error: ${response.body}");
+      return 'Gemini API Error';
+    }
+  }
+}
