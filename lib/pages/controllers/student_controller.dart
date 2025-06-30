@@ -19,7 +19,7 @@ class StudentController extends GetxController {
     isLoading.value = true;
     try {
       final supabase = Supabase.instance.client;
-      final data = await supabase.from('students').select();
+      final data = await supabase.from('students').select().order('name', ascending: true);
 
       allStudents.value = (data as List)
           .map((item) => Student.fromMap(item))
@@ -38,7 +38,8 @@ class StudentController extends GetxController {
       final supabase = Supabase.instance.client;
       final data = await supabase.from('students')
           .select()
-          .eq('batch_id', batchUid);
+          .eq('batch_id', batchUid)
+          .order('name', ascending: true);
 
       final students = (data as List)
           .map((item) => Student.fromMap(item))

@@ -209,13 +209,13 @@ class _AttendancePageState extends State<AttendancePage> {
                 if (isLoading) {
                   return const Center(child: CircularProgressIndicator(color: Colors.redAccent));
                 }
-
+              
                 if (batches.isEmpty) {
                   return const Center(child: HintText(text: "No Batches found."));
                 }
-
+              
                 return Obx ( () {
-                  attendanceController.refreshTrigger.value;  
+                  attendanceController.refreshTrigger.value;
                   return Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -302,10 +302,12 @@ class _StudentTile extends StatelessWidget {
     final attendanceController = Get.find<AttendanceController>();
     final studentController = Get.find<StudentController>();
 
-    return FutureBuilder<bool>(
-      future: ifAttendanceMarked(date, student),
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: getAttendanceStatus(date, student),
       builder: (context, snapshot) {
-        final alreadyMarked = snapshot.data ?? false;
+        final data = snapshot.data;
+        final alreadyMarked = data != null;
+        final present = data?['present'] == true;
 
         return Padding(
           padding: const EdgeInsets.all(4.0),
@@ -473,7 +475,7 @@ class _StudentTile extends StatelessWidget {
                   child: Container(
                     alignment: Alignment.center,
                     child: Text(
-                      "MARKED",
+                      present? "Present" : "Absent",
                       style: TextStyle(
                         color: Colors.red.withValues(alpha: 0.25),
                         fontSize: 32,
