@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:get/get.dart';
+import 'package:the_project/controllers/ai_chat_controller.dart';
 import 'package:the_project/utils/colors.dart';
 
 class CustomNavigationBar extends StatelessWidget {
@@ -13,14 +11,21 @@ class CustomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chatController = Get.put(AiChatController());
 
     return GetBuilder<NavController>(
       builder: (navController) {
-        Widget buildNavButton(String label, String route) {
+        Widget buildNavButton(String label, String route, {VoidCallback? onTap}) {
           final isActive = navController.currentRoute == route;
 
           return TextButton(
             onPressed: () {
+              if (onTap != null) {
+                onTap();
+                onLinkPressed?.call();
+                return;
+              }
+
               if (!isActive) {
                 Get.toNamed(route, id: 1);
                 onLinkPressed?.call();
@@ -46,6 +51,17 @@ class CustomNavigationBar extends StatelessWidget {
           buildNavButton('Batches', '/batches'),
           buildNavButton('Students', '/students'),
           buildNavButton('About', '/about'),
+          buildNavButton(
+            'Chat with AI',
+            '', // no routing
+            onTap: () {
+              if (!chatController.isChatOpen.value) {
+                chatController.showChatOverlay(context); // floating chat trigger
+              } else {
+                chatController.isChatOpen.value = false;
+              }
+            },
+          ),
         ];
 
         return isVertical 

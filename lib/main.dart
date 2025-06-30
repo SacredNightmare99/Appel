@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:the_project/pages/controllers/attendance_controller.dart';
-import 'package:the_project/pages/controllers/batch_controller.dart';
-import 'package:the_project/pages/controllers/student_controller.dart';
+import 'package:the_project/controllers/attendance_controller.dart';
+import 'package:the_project/controllers/batch_controller.dart';
+import 'package:the_project/controllers/student_controller.dart';
 import 'package:the_project/shell_page.dart';
 import 'package:the_project/widgets/custom_navbar.dart';
 
