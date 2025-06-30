@@ -36,20 +36,20 @@ Future<void> markAttendanceForStudent(Student student, bool present, DateTime da
 
 }
 
-Future<bool> ifAttendanceMarked(DateTime date, Student student) async {
+Future<Map<String, dynamic>?> getAttendanceStatus(DateTime date, Student student) async {
   final supabase = Supabase.instance.client;
-
   final dateOnly = DateTime(date.year, date.month, date.day).toIso8601String();
 
   try {
     final result = await supabase
-          .from('attendance')
-          .select()
-          .eq('student_uid', student.uid)
-          .eq('date', dateOnly)
-          .maybeSingle();
-    return result != null;
+        .from('attendance')
+        .select('present')
+        .eq('student_uid', student.uid)
+        .eq('date', dateOnly)
+        .maybeSingle();
+    return result;
   } catch (e) {
-    return false;
+    print('Error fetching attendance: $e');
+    return null;
   }
 }
