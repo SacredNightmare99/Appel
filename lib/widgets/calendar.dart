@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_project/pages/controllers/attendance_controller.dart';
-import 'package:the_project/pages/controllers/batch_controller.dart';
+import 'package:the_project/controllers/attendance_controller.dart';
+import 'package:the_project/controllers/batch_controller.dart';
 import 'package:the_project/utils/helpers.dart';
 
 class CustomCalendar extends StatelessWidget {
