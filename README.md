@@ -1,69 +1,58 @@
-# 🤖 Appel AI Integration (Gemini Chat Assistant)
+# 📘 Appel
 
-This branch introduces an intelligent chatbot assistant into **Appel**, powered by Google's **Gemini API** and integrated with **GetX** for state management.
+[![Made with Flutter](https://img.shields.io/badge/Made%20with-Flutter-blue)](https://flutter.dev/)
+[![Powered by Supabase](https://img.shields.io/badge/Backend-Supabase-green)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange)]()
 
-> _"L'appel du futur."_ – The roll call of the future.
-
----
-
-## 🔍 Overview
-
-The AI Assistant acts as a smart interface between educators and the attendance system. It allows conversational interactions for querying attendance data, summarizing student performance, and (soon) performing attendance actions.
+**Appel** is a clean and powerful web app built with **Flutter** and **Supabase**, designed to help educators manage students, organize batches, and track attendance efficiently — all inspired by the French academic tradition of _l’appel_.
 
 ---
 
-## 🚀 Stack Overview
+## 🚀 Tech Stack
 
-- 🧠 **Gemini API** – for generating AI responses
-- 📱 **Flutter** – UI framework
-- ⚙️ **GetX** – manages chat state and logic
-- 🔗 **Supabase** – handles student, batch, and attendance data
+- **Frontend**: Flutter Web
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
 
 ---
 
-## ✨ AI Assistant Features
+## ✅ Features
 
-- 💬 **Natural Language Queries**
-  - “Which students were absent yesterday?”
-  - “Show Batch B2’s attendance for this week”
-
-- ⚙️ **Smart Actions**
-  - Create batches or register students via chat (planned)
-  - Mark attendance (planned)
-
-- 📊 **Insights & Summaries**
-  - Batch attendance summaries
-  - Spot irregular or low-attendance patterns
-
-- 🧠 **Contextual Guidance**
-  - The AI explains how to use app features
-  - Suggests next steps and corrections
+- 👨‍🎓 **Student Management**: Add, edit, and manage student profiles.
+- 🗂️ **Batch Management**: Create batches and assign students to them.
+- 📅 **Timetable Assignment**: Assign batches to specific weekdays for structured attendance scheduling.
+- 🧾 **Attendance Tracking**:
+  - Mark attendance **batch-wise** or **individually**.
+  - Easily mark attendance for **previous dates**.
+- 🗓️ **Interactive Calendar**:
+  - Select any date to view or modify attendance records.
+  - Smooth date-based filtering for organized views.
+- ⚡ **Real-time Sync**: All updates sync instantly with Supabase backend.
 
 ---
 
-## 🧪 In Progress / Planned
+## 🤖 Planned Features
 
-- ✍️ Gemini-powered data creation (batches, students)
-- ✅ Confirmable attendance marking via AI
-- 🔒 Secure Supabase write-actions through validation and roles
-- 🧼 Cleaner markdown rendering for chat responses
+- 💬 **AI Assistant**: Integration of a Gemini-based chatbot assistant.
+  - Query student/batch data using natural language.
+  - Auto-suggest students with missing attendance.
+  - Voice/text-based attendance marking.
+  - Smart batch creation and student registration via chat.
 
 ---
 
-## ⚠️ Note
+## 📷 Screenshots
 
-All AI actions that modify data are behind confirmation prompts to prevent unwanted writes. Data control stays in the user’s hands.
+> _Coming soon..._
+
+---
+
+## ✨ Contributing
+
+Contributions, feedback, and suggestions are always welcome. Feel free to open an issue or a PR.
 
 ---
 
 ## 📄 License
 
-[MIT License](../LICENSE)
-
----
-
-## ✨ Purpose-Driven AI
-
-Appel AI Assistant was built to enhance—not replace—educators.  
-A tool with clarity, elegance, and intention, just like the classroom.
-
+[MIT License](LICENSE)
