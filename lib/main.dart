@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:the_project/controllers/ai_chat_controller.dart';
 import 'package:the_project/controllers/attendance_controller.dart';
 import 'package:the_project/controllers/batch_controller.dart';
 import 'package:the_project/controllers/student_controller.dart';
@@ -21,6 +22,7 @@ void main() async{
   Get.put(StudentController());
   Get.put(AttendanceController());
   Get.put(BatchController());
+  Get.put(AiChatController());
   runApp(MyApp());
 
 }

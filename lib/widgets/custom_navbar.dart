@@ -11,7 +11,7 @@ class CustomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatController = Get.put(AiChatController());
+    final chatController = Get.find<AiChatController>();
 
     return GetBuilder<NavController>(
       builder: (navController) {
