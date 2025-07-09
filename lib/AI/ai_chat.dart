@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:the_project/AI/gemini_service.dart';
 import 'package:the_project/controllers/ai_chat_controller.dart';
+import 'package:the_project/utils/colors.dart';
 
 class AIChat extends StatelessWidget {
   AIChat({super.key});
@@ -19,6 +20,9 @@ class AIChat extends StatelessWidget {
         lower.contains("present") ||
         lower.contains("absent");
 
+    final isRelevant = includeStudent || includeBatch || includeAttendance;
+    if (!isRelevant) return "Not a relevant query.";
+
     final isCountQuery = lower.contains("total") ||
         lower.contains("count") ||
         lower.contains("how many");
@@ -28,6 +32,11 @@ class AIChat extends StatelessWidget {
     final attendance = chatController.attendance;
 
     List<String> contextSections = [];
+
+    // Add current date
+    final today = DateTime.now();
+    final formattedDate = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    contextSections.add("_Current Date: ${formattedDate}_");
 
     // Manual counts for summary
     if (isCountQuery) {
@@ -53,36 +62,42 @@ class AIChat extends StatelessWidget {
         contextSections.add("- Absent entries: $absentCount");
       }
 
-      contextSections.add(""); // Spacer line
+      contextSections.add("");
     }
 
-    if (includeStudent) {
-      if (students.isNotEmpty) {
-        contextSections.add("**Students:**\n${students.map((row) {
-          return "- ${row['name']} (uid: ${row['uid']})"
-              "${row['batch_name'] != null ? ", Batch: ${row['batch_name']}" : ""}, "
-              "Classes: ${row['classes']}, Present: ${row['classes_present']}";
-        }).join("\n")}");
-      }
+    // Student Info
+    if (includeStudent && students.isNotEmpty) {
+      contextSections.add("**Students:**\n${students.map((row) {
+        final name = row['name'] ?? "Unnamed";
+        final batch = row['batch_name'] != null ? ", Batch: ${row['batch_name']}" : "";
+        final classes = row['classes'] ?? 0;
+        final present = row['classes_present'] ?? 0;
+
+        return "- $name$batch, Classes: $classes, Present: $present";
+      }).join("\n")}");
     }
 
-    if (includeBatch) {
-      if (batches.isNotEmpty) {
-        contextSections.add("**Batches:**\n${batches.map((row) {
-          return "- ${row['name']} (uid: ${row['batch_uid']}), "
-              "Day: ${row['day']}, "
-              "Time: ${row['start_time']} - ${row['end_time']}";
-        }).join("\n")}");
-      }
+    // Batch Info
+    if (includeBatch && batches.isNotEmpty) {
+      contextSections.add("**Batches:**\n${batches.map((row) {
+        final name = row['name'] ?? "Unnamed";
+        final day = row['day'] ?? "N/A";
+        final start = row['start_time'] ?? "??";
+        final end = row['end_time'] ?? "??";
+
+        return "- $name, Day: $day, Time: $start - $end";
+      }).join("\n")}");
     }
 
-    if (includeAttendance) {
-      if (attendance.isNotEmpty) {
-        contextSections.add("**Attendance Records:**\n${attendance.map((row) {
-          return "- ${row['student_uid']} was "
-              "${row['present'] ? "present" : "absent"} on ${row['date']}";
-        }).join("\n")}");
-      }
+    // Attendance info
+    if (includeAttendance && attendance.isNotEmpty) {
+      contextSections.add("**Attendance Records:**\n${attendance.map((row) {
+        final name = row['student_name'] ?? "Unknown";
+        final date = row['date'] ?? "Unknown date";
+        final present = row['present'] == true ? "present" : "absent";
+
+        return "- $name was $present on $date";
+      }).join("\n")}");
     }
 
     return contextSections.isEmpty
@@ -100,9 +115,18 @@ class AIChat extends StatelessWidget {
 
     chatController.addMessage("bot", "Thinking...");
 
+    final List<Map<String, String>> history = chatController.messages
+      .where((msg) => msg['text'] != "Thinking...")
+      .map((msg) => {
+            "role": msg['role']!,
+            "text": msg['text']!,
+          })
+      .toList();
+
     final result = await GeminiService.getResponse(
       userPrompt: question,
       contextData: _generateContextFromPrompt(question),
+      history: history
     );
 
     final botIndex = chatController.messages.lastIndexWhere((msg) => msg['role'] == 'bot');
@@ -135,17 +159,30 @@ class AIChat extends StatelessWidget {
                 final isUser = msg['role'] == 'user';
                 return Align(
                   alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 6),
-                    padding: EdgeInsets.all(12),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.blue[100] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: MarkdownBody(
-                      data: msg['text'] ?? '',
-                    ),
+                  child: Column(
+                    crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                        padding: EdgeInsets.all(12),
+                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
+                        decoration: BoxDecoration(
+                          color: isUser ? Colors.blue[100] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: MarkdownBody(
+                          data: msg['text'] ?? '',
+                        ),
+                      ),
+                      if (!isUser) 
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, left: 4),
+                          child: Text(
+                            "Powered by Google Gemini",
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                        )  
+                    ],
                   ),
                 );
               },
@@ -169,8 +206,11 @@ class AIChat extends StatelessWidget {
               ),
               SizedBox(width: 8),
               ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(AppColors.frenchBlue)
+                ),
                 onPressed: _askAI,
-                child: Text("Send"),
+                child: Text("Send", style: TextStyle(color: Colors.white),),
               ),
             ],
           ),

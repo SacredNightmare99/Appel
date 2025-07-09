@@ -7,6 +7,7 @@ import 'package:the_project/controllers/attendance_controller.dart';
 import 'package:the_project/controllers/batch_controller.dart';
 import 'package:the_project/controllers/student_controller.dart';
 import 'package:the_project/shell_page.dart';
+import 'package:the_project/utils/colors.dart';
 import 'package:the_project/widgets/custom_navbar.dart';
 
 void main() async{
@@ -34,8 +35,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Learn French With Anuj",
+      title: "Appel",
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: AppColors.frenchBlue)),
       home: ShellPage(),
     );
   }

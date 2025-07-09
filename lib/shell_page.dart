@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:the_project/pages/about_page.dart';
 import 'package:the_project/pages/attendance_page.dart';
 import 'package:the_project/pages/batches_page.dart';
 import 'package:the_project/pages/home_page.dart';
@@ -93,8 +92,6 @@ class ShellPage extends StatelessWidget {
 
 Widget _getPageRouteBuilder(String? route) {
   switch (route) {
-    case '/about':
-      return AboutPage();
     case '/attendance':
       return AttendancePage();
     case '/batches':

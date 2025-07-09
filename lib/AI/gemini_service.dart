@@ -9,23 +9,32 @@ class GeminiService {
   static Future<String> getResponse({
     required String userPrompt,
     required String contextData,
+    required List<Map<String, String>> history,
   }) async {
-    final fullPrompt = "$userPrompt\n\nContext Data:\n$contextData";
+    final List<Map<String, dynamic>> contents = [];
+
+    for (var msg in history) {
+      contents.add({
+        "parts": [{"text": msg['text']}],
+        "role": msg['role'] == "user" ? "user" : "model"
+      });
+    }
+
+    contents.add({
+      "parts": [
+        {
+          "text": "$userPrompt\n\nContext Data:\n$contextData",
+        }
+      ],
+      "role": "user"
+    });
 
     final response = await http.post(
       Uri.parse(_endpoint),
       headers: {
         'Content-Type': 'application/json',
       },
-      body: jsonEncode({
-        "contents": [
-          {
-            "parts": [
-              {"text": fullPrompt}
-            ]
-          }
-        ]
-      }),
+      body: jsonEncode({"contents": contents}),
     );
 
     if (response.statusCode == 200) {

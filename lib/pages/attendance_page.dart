@@ -216,12 +216,17 @@ class _AttendancePageState extends State<AttendancePage> {
               
                 return Obx ( () {
                   attendanceController.refreshTrigger.value;
-                  return Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: List.generate(
-                      batches.length,
-                      (index) => _BatchTile(batch: batches[index], date: date),
+                  return SizedBox(
+                    width: double.infinity,
+                    child: Center(
+                      child: Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: List.generate(
+                          batches.length,
+                          (index) => _BatchTile(batch: batches[index], date: date),
+                        ),
+                      ),
                     ),
                   );
                 });
@@ -256,7 +261,8 @@ class _AttendancePageState extends State<AttendancePage> {
               ),
             ],
           ),
-          SizedBox(
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
             height: 470,
             child: Obx(() {
               final students = studentController.filteredStudents;
@@ -274,11 +280,13 @@ class _AttendancePageState extends State<AttendancePage> {
                 return const Center(child: HintText(text: "No Students found."));
               }
               
-              return Obx( () {
+              return Obx(() {
                 attendanceController.refreshTrigger.value; 
-                return ListView.builder(
-                  itemCount: students.length,
-                  itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
+                return SizedBox(
+                  child: ListView.builder(
+                    itemCount: students.length,
+                    itemBuilder: (context, index) => _StudentTile(student: students[index], date: date,),
+                  ),
                 ); 
               });
             }),
@@ -558,7 +566,8 @@ class _BatchTileState extends State<_BatchTile> {
                   ]
                 ),
               ),
-              SizedBox(
+              Container(
+                padding: const EdgeInsets.all(10),
                 height: 360,
                 child: Obx(() {
                   final students = studentController.getBatchStudents(widget.batch.uid);

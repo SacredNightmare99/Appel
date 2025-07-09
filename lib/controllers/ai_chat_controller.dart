@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:the_project/AI/ai_chat.dart';
 import 'package:the_project/utils/colors.dart';
@@ -15,9 +16,12 @@ class AiChatController extends GetxController {
 
   Future<void> loadContextData() async {
     final supabase = Supabase.instance.client;
-    students.value = await supabase.from('students').select();
-    batches.value = await supabase.from('batches').select();
-    attendance.value = await supabase.from('attendance').select();
+    students.value = await supabase.from('students')
+        .select('name, batch_name, classes, classes_present');
+    batches.value = await supabase.from('batches')
+        .select('day, name, start_time, end_time');
+    attendance.value = await supabase.from('attendance')
+        .select('date, present, student_name');
   }
 
   void addMessage(String role, String text) {
@@ -117,10 +121,10 @@ class AiChatController extends GetxController {
                                   width: 20,
                                   height: 20,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[600],
+                                    color: Colors.black12,
                                     borderRadius: const BorderRadius.only(topLeft: Radius.circular(4)),
                                   ),
-                                  child: const Icon(Icons.drag_handle, size: 14, color: Colors.white),
+                                  child: Icon(Iconsax.arrow, size: 14, color: AppColors.frenchBlue),
                                 ),
                               ),
                             )

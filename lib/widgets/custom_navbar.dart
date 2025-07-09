@@ -15,10 +15,17 @@ class CustomNavigationBar extends StatelessWidget {
 
     return GetBuilder<NavController>(
       builder: (navController) {
-        Widget buildNavButton(String label, String route, {VoidCallback? onTap}) {
+        Widget buildNavButton(String label, String route, {VoidCallback? onTap, Color? bgColor}) {
           final isActive = navController.currentRoute == route;
 
           return TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: bgColor,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(2)
+              )
+            ),
             onPressed: () {
               if (onTap != null) {
                 onTap();
@@ -50,7 +57,6 @@ class CustomNavigationBar extends StatelessWidget {
           buildNavButton('Attendance', '/attendance'),
           buildNavButton('Batches', '/batches'),
           buildNavButton('Students', '/students'),
-          buildNavButton('About', '/about'),
           buildNavButton(
             'Chat with AI',
             '', // no routing
@@ -61,6 +67,7 @@ class CustomNavigationBar extends StatelessWidget {
                 chatController.isChatOpen.value = false;
               }
             },
+            bgColor: AppColors.frenchRed
           ),
         ];
 
@@ -77,7 +84,7 @@ class CustomNavigationBar extends StatelessWidget {
         : Container(
             height: 60,
             color: AppColors.frenchBlue,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: navButtons,
             ),
@@ -93,6 +100,6 @@ class NavController extends GetxController {
 
   void updateRoute(String route) {
     currentRoute = route;
-    update(); // tells GetBuilder to rebuild
+    update();
   }
 }

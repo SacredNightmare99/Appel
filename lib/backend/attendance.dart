@@ -25,6 +25,7 @@ Future<void> markAttendanceForStudent(Student student, bool present, DateTime da
     'date': dateOnly.toIso8601String(),
     'present': present,
     'student_uid': student.uid,
+    'student_name': student.name,
   }));
 
   await supabase.from('students')
