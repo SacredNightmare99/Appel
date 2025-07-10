@@ -15,19 +15,38 @@ class BatchController extends GetxController {
     selectedBatch.value = batch;
   }
 
-  Future<void> refreshAllBatches() async {
+ Future<void> refreshAllBatches() async {
     isAllLoading.value = true;
 
     try {
       final supabase = Supabase.instance.client;
       final data = await supabase
           .from('batches')
-          .select()
-          .order('start_time');
+          .select();
 
-      allBatches.value = (data as List)
+      final batches = (data as List)
           .map((item) => Batch.fromMap(item))
           .toList();
+
+      // Custom weekday ordering
+      const dayOrder = {
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6,
+        "Sunday": 7,
+      };
+
+      batches.sort((a, b) {
+        final aDay = dayOrder[a.day] ?? 999;
+        final bDay = dayOrder[b.day] ?? 999;
+        if (aDay != bDay) return aDay.compareTo(bDay);
+        return _timeToMinutes(a.startTime).compareTo(_timeToMinutes(b.startTime));
+      });
+
+      allBatches.value = batches;
     } catch (e) {
       debugPrint('Error fetching all Batches: $e');
       allBatches.clear();
@@ -35,6 +54,8 @@ class BatchController extends GetxController {
       isAllLoading.value = false;
     }
   }
+
+  int _timeToMinutes(TimeOfDay time) => time.hour * 60 + time.minute;
 
   Future<void> refreshDayBatches(String day) async {
     isDayLoading.value = true;
@@ -45,7 +66,7 @@ class BatchController extends GetxController {
           .from('batches')
           .select()
           .eq('day', day)
-          .order('start_time');
+          .order('start_time', ascending: true);
 
       dayBatches.value = (data as List)
           .map((item) => Batch.fromMap(item))

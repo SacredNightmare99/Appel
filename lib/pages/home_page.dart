@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_project/utils/colors.dart';
+import 'package:the_project/utils/image_paths.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -20,7 +21,7 @@ class HomePage extends StatelessWidget {
                 children: [
                   // App Logo
                   Image.asset(
-                    'assets/lfwa_logo.png',
+                    AppImagePaths.logo,
                     width: width > 600 ? 180 : 120,
                   ),
                   const SizedBox(height: 20),

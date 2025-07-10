@@ -6,6 +6,9 @@ import 'package:the_project/AI/ai_chat.dart';
 import 'package:the_project/utils/colors.dart';
 
 class AiChatController extends GetxController {
+  final TextEditingController textController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+
   var isChatOpen = false.obs;
 
   var messages = <Map<String, String>>[].obs;
@@ -14,15 +17,11 @@ class AiChatController extends GetxController {
   final batches = <Map<String, dynamic>>[].obs;
   final attendance = <Map<String, dynamic>>[].obs;
 
-  Future<void> loadContextData() async {
-    final supabase = Supabase.instance.client;
-    students.value = await supabase.from('students')
-        .select('name, batch_name, classes, classes_present');
-    batches.value = await supabase.from('batches')
-        .select('day, name, start_time, end_time');
-    attendance.value = await supabase.from('attendance')
-        .select('date, present, student_name');
-  }
+  final _supabase = Supabase.instance.client;
+
+  late RealtimeChannel _studentChannel;
+  late RealtimeChannel _batchChannel;
+  late RealtimeChannel _attendanceChannel;
 
   void addMessage(String role, String text) {
     messages.add({'role': role, 'text': text});
@@ -30,6 +29,50 @@ class AiChatController extends GetxController {
 
   void clearMessages() {
     messages.clear();
+  }
+
+  Future<void> _fetchAllData() async {
+    students.value = await _supabase.from('students')
+        .select('name, batch_name, classes, classes_present');
+
+    batches.value = await _supabase.from('batches')
+        .select('day, name, start_time, end_time');
+
+    attendance.value = await _supabase.from('attendance')
+        .select('date, present, student_name');
+  }
+
+  void _subscribeToChanges() {
+    _studentChannel = _supabase.channel('students_changes');
+    _batchChannel = _supabase.channel('batches_changes');
+    _attendanceChannel = _supabase.channel('attendance_changes');
+
+    _studentChannel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'students',
+          callback: (_) => _fetchAllData(),
+        )
+        .subscribe();
+
+    _batchChannel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'batches',
+          callback: (_) => _fetchAllData(),
+        )
+        .subscribe();
+
+    _attendanceChannel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'attendance',
+          callback: (_) => _fetchAllData(),
+        )
+        .subscribe();
   }
 
   void showChatOverlay(BuildContext context) {
@@ -148,7 +191,15 @@ class AiChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadContextData();
+    _fetchAllData();
+    _subscribeToChanges();
+  }
+  @override
+  void onClose() {
+    _supabase.removeChannel(_studentChannel);
+    _supabase.removeChannel(_batchChannel);
+    _supabase.removeChannel(_attendanceChannel);
+    super.onClose();
   }
 
 }

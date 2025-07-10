@@ -666,6 +666,26 @@ class _AddBatchDialog extends StatelessWidget {
                         final picked = await showTimePicker(
                           context: context,
                           initialTime: TimeOfDay.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                timePickerTheme: TimePickerThemeData(
+                                  backgroundColor: AppColors.background,
+                                  dialHandColor: AppColors.frenchBlue,
+                                  dialBackgroundColor: AppColors.cardLight,
+                                  hourMinuteTextColor: AppColors.frenchBlue,
+                                  hourMinuteColor: AppColors.cardLight,
+                                  entryModeIconColor: Colors.white,
+                                  dayPeriodColor: AppColors.frenchBlue,
+                                  dayPeriodTextColor: Colors.white  
+                                ),
+                                textButtonTheme: TextButtonThemeData(
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.frenchBlue),
+                                ),
+                              ),
+                              child: child!
+                            );
+                          },
                         );
                         if (picked != null) {
                           setState(() => startTime = picked);
@@ -688,6 +708,26 @@ class _AddBatchDialog extends StatelessWidget {
                         final picked = await showTimePicker(
                           context: context,
                           initialTime: TimeOfDay.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                timePickerTheme: TimePickerThemeData(
+                                  backgroundColor: AppColors.background,
+                                  dialHandColor: AppColors.frenchBlue,
+                                  dialBackgroundColor: AppColors.cardLight,
+                                  hourMinuteTextColor: AppColors.frenchBlue,
+                                  hourMinuteColor: AppColors.cardLight,
+                                  entryModeIconColor: Colors.white,
+                                  dayPeriodColor: AppColors.frenchBlue,
+                                  dayPeriodTextColor: Colors.white  
+                                ),
+                                textButtonTheme: TextButtonThemeData(
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.frenchBlue),
+                                ),
+                              ),
+                              child: child!
+                            );
+                          },
                         );
                         if (picked != null) {
                           setState(() => endTime = picked);
@@ -735,20 +775,68 @@ class _AddBatchDialog extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               final name = nameController.text.trim();
-              if (name.isNotEmpty &&
-                  startTime != null &&
-                  endTime != null &&
-                  selectedDay != null) {
-                await insertBatch(
-                  name: name,
-                  startTime: startTime!,
-                  endTime: endTime!,
-                  day: selectedDay!,
+              if (name.isEmpty || startTime == null || endTime == null || selectedDay == null) return;
+
+              final newStartMinutes = startTime!.hour * 60 + startTime!.minute;
+              final newEndMinutes = endTime!.hour * 60 + endTime!.minute;
+
+              if (newEndMinutes <= newStartMinutes) {
+                Get.snackbar(
+                  "Invalid Time",
+                  "End time must be after start time",
+                  backgroundColor: AppColors.tileBackground,
+                  colorText: AppColors.text,
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  borderRadius: 12,
+                  padding: const EdgeInsets.all(16),
+                  icon: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                  shouldIconPulse: false,
+                  duration: const Duration(seconds: 3),
                 );
-                await batchController.refreshAllBatches();
-                Get.back();
+
+                return;
               }
+
+              // Fetch existing batches for the selected day
+              final existingBatches = batchController.allBatches.where((batch) => batch.day == selectedDay).toList();
+
+              bool isConflict = existingBatches.any((batch) {
+                final existingStart = batch.startTime.hour * 60 + batch.startTime.minute;
+                final existingEnd = batch.endTime.hour * 60 + batch.endTime.minute;
+
+                // Check for time overlap
+                return !(newEndMinutes <= existingStart || newStartMinutes >= existingEnd);
+              });
+
+              if (isConflict) {
+                Get.snackbar(
+                  "Conflict", 
+                  "Another batch already exists in this time range",
+                  backgroundColor: AppColors.tileBackground,
+                  colorText: AppColors.text,
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  borderRadius: 12,
+                  padding: const EdgeInsets.all(16),
+                  icon: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                  shouldIconPulse: false,
+                  duration: const Duration(seconds: 3),
+                );
+                return;
+              }
+
+              // Proceed to add the batch
+              await insertBatch(
+                name: name,
+                startTime: startTime!,
+                endTime: endTime!,
+                day: selectedDay!,
+              );
+              await batchController.refreshAllBatches();
+              Get.back();
             },
+
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.frenchBlue
             ),

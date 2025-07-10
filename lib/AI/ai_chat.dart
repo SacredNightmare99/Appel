@@ -6,12 +6,10 @@ import 'package:the_project/controllers/ai_chat_controller.dart';
 import 'package:the_project/utils/colors.dart';
 
 class AIChat extends StatelessWidget {
-  AIChat({super.key});
-  final TextEditingController _controller = TextEditingController();
-  final AiChatController chatController = Get.find<AiChatController>();
-  final ScrollController _scrollController = ScrollController();
-
+  const AIChat({super.key});
+  
   String _generateContextFromPrompt(String prompt) {
+    final chatController = Get.find<AiChatController>();
     final lower = prompt.toLowerCase();
 
     final includeStudent = lower.contains("student");
@@ -107,11 +105,15 @@ class AIChat extends StatelessWidget {
 
   
   Future<void> _askAI() async {
-    final question = _controller.text.trim();
+    final chatController = Get.find<AiChatController>();
+    final controller = chatController.textController;
+    final scrollController = chatController.scrollController;
+
+    final question = controller.text.trim();
     if (question.isEmpty) return;
 
     chatController.addMessage("user", question);
-    _controller.clear();
+    controller.clear();
 
     chatController.addMessage("bot", "Thinking...");
 
@@ -136,8 +138,8 @@ class AIChat extends StatelessWidget {
     }
 
     await Future.delayed(Duration(milliseconds: 300));
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
+    scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
       duration: Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
@@ -145,13 +147,17 @@ class AIChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chatController = Get.find<AiChatController>();
+    final controller = chatController.textController;
+    final scrollController = chatController.scrollController;
+
     return Column(
       children: [
         Expanded(
           child: Obx(() {
             final messages = chatController.messages;
             return ListView.builder(
-              controller: _scrollController,
+              controller: scrollController,
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               itemCount: messages.length,
               itemBuilder: (context, index) {
@@ -196,7 +202,7 @@ class AIChat extends StatelessWidget {
               Expanded(
                 child: TextField(
                   autofocus: true,
-                  controller: _controller,
+                  controller: controller,
                   onSubmitted: (_) => _askAI(),
                   decoration: InputDecoration(
                     hintText: 'Ask something...',

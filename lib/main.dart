@@ -19,11 +19,13 @@ void main() async{
     anonKey: dotenv.env['SupabaseAPI']!
   );
 
+  // Put all controllers
   Get.put(NavController());
   Get.put(StudentController());
   Get.put(AttendanceController());
   Get.put(BatchController());
   Get.put(AiChatController());
+  
   runApp(MyApp());
 
 }
