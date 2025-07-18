@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:the_project/backend/attendance.dart';
 import 'package:the_project/backend/student.dart';
+import 'package:the_project/controllers/student_controller.dart';
 
 class AttendanceController extends GetxController {
   final Rxn<DateTime> selectedDate = Rxn<DateTime>();
@@ -31,14 +32,13 @@ class AttendanceController extends GetxController {
 
   Future<void> fetchAttendanceForStudent(Student student) async {
     isLoading.value = true;
-
     try {
       final supabase = Supabase.instance.client;
       final data = await supabase
           .from('attendance')
-          .select()
+          .select('uid, date, present, student_uid')
           .eq('student_uid', student.uid)
-          .order('date');
+          .order('date', ascending: true);
 
       attendance.value = (data as List)
           .map((item) => Attendance.fromMap(item))
@@ -49,7 +49,44 @@ class AttendanceController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
 
+  Future<void> toggleAttendanceStatus(Attendance originalAttendance, Student student) async {
+    final studentController = Get.find<StudentController>();
+    final updatedAttendance = originalAttendance.copyWith(present: !originalAttendance.present);
+    
+    try {
+      await updateAttendance(originalAttendance, updatedAttendance);
+      
+      await fetchAttendanceForStudent(student);
+      
+      int presentCountChange = 0;
+      if (originalAttendance.present && !updatedAttendance.present) {
+        presentCountChange = -1; // Was present, now absent
+      } else if (!originalAttendance.present && updatedAttendance.present) {
+        presentCountChange = 1;  // Was absent, now present
+      }
+
+      if (studentController.selectedStudent.value != null) {
+        studentController.selectedStudent.value = studentController.selectedStudent.value!.copyWith(
+          classesPresent: studentController.selectedStudent.value!.classesPresent + presentCountChange,
+        );
+      }
+
+    } catch (e) {
+      Get.snackbar("Error", "Failed to update attendance status.");
+    }
+  }
+
+  Future<void> deleteAttendanceRecord(Attendance attendanceToDelete, Student student) async {
+    try {
+      await deleteAttendance(attendanceToDelete);
+
+      await fetchAttendanceForStudent(student);
+      Get.find<StudentController>().refreshAllStudents();
+    } catch (e) {
+      Get.snackbar("Error", "Failed to delete attendance record.");
+    }
   }
 
   void clear() {

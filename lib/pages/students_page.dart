@@ -490,51 +490,43 @@ class _AttendanceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(6),
+
+    final attendanceController = Get.find<AttendanceController>();
+    final studentController = Get.find<StudentController>();
+    final selectedStudent = studentController.selectedStudent.value;
+    if (selectedStudent == null) return const SizedBox.shrink();
+
+  return Container(
+      margin: const EdgeInsets.all(6),
       child: Material(
         elevation: 1,
         color: AppColors.tileBackground,
         borderRadius: BorderRadius.circular(6),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(AppHelper.formatDate(attendance.date)),
-              Text.rich(
-                TextSpan(
-                  children: attendance.present
-                      ? [
-                          TextSpan(
-                            text: 'P',
-                            style: TextStyle(
-                              color: AppColors.frenchBlue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: 'resent',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ]
-                      : [
-                          TextSpan(
-                            text: 'A',
-                            style: TextStyle(
-                              color: AppColors.frenchRed,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: 'bsent',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onDoubleTap: () => attendanceController.toggleAttendanceStatus(attendance, selectedStudent),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(AppHelper.formatDate(attendance.date)),
+                Text.rich(
+                  TextSpan(
+                    children: attendance.present
+                        ? [
+                            const TextSpan(text: 'P', style: TextStyle(color: AppColors.frenchBlue, fontWeight: FontWeight.bold)),
+                            const TextSpan(text: 'resent', style: TextStyle(color: Colors.black)),
+                          ]
+                        : [
+                            const TextSpan(text: 'A', style: TextStyle(color: AppColors.frenchRed, fontWeight: FontWeight.bold)),
+                            const TextSpan(text: 'bsent', style: TextStyle(color: Colors.black)),
+                          ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
