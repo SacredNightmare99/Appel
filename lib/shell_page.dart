@@ -53,7 +53,7 @@ class ShellPage extends StatelessWidget {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: const Text("Learn French With Anuj", style: TextStyle(color: Colors.white),),
+        title: const Text("Appel", style: TextStyle(color: Colors.white),),
         backgroundColor: AppColors.frenchBlue,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
