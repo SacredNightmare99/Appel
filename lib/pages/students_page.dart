@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:the_project/backend/attendance.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/controllers/attendance_controller.dart';
+import 'package:the_project/controllers/batch_controller.dart';
 import 'package:the_project/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
@@ -130,6 +131,15 @@ class _StudentsPageState extends State<StudentsPage> {
     );
   }
 
+  void _editStudent(Student student) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, 
+      builder: (context) {
+        return _EditStudentDialog(student: student);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -284,11 +294,22 @@ class _StudentsPageState extends State<StudentsPage> {
                     child: IconButton(
                       onPressed: () => _removeStudent(selectedStudent),
                       icon: const Icon(Icons.delete_forever),
-                      color: AppColors.frenchRed, // French Red
+                      color: AppColors.frenchRed,
                       iconSize: 24,
                       tooltip: "Remove Student",
                     ),
                   ),
+                if (selectedStudent != null)
+                  Positioned(
+                    left: 0,
+                    child: IconButton(
+                      onPressed: () => _editStudent(selectedStudent), 
+                      icon: const Icon(Icons.edit),
+                      color: AppColors.frenchRed,
+                      iconSize: 24,
+                      tooltip: "Edit Student",
+                    )
+                  )
               ],
             ),
           ),
@@ -564,3 +585,160 @@ class _StudentTile extends StatelessWidget {
   }
 }
 
+class _EditStudentDialog extends StatefulWidget {
+  final Student student;
+
+  const _EditStudentDialog({required this.student});
+
+  @override
+  State<_EditStudentDialog> createState() => _EditStudentDialogState();
+}
+
+class _EditStudentDialogState extends State<_EditStudentDialog> {
+  final _formKey = GlobalKey<FormState>();
+
+  final studentController = Get.find<StudentController>();
+  final batchController = Get.find<BatchController>(); 
+  
+  late final TextEditingController _nameController;
+  late final TextEditingController _classesPresentController;
+  late final TextEditingController _totalClassesController;
+  String? _selectedBatchUid;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill the form with the student's existing data
+    _nameController = TextEditingController(text: widget.student.name);
+    _classesPresentController = TextEditingController(text: widget.student.classesPresent.toString());
+    _totalClassesController = TextEditingController(text: widget.student.classes.toString());
+    _selectedBatchUid = widget.student.batchUid;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _classesPresentController.dispose();
+    _totalClassesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onSave() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final selectedBatch = _selectedBatchUid != null
+      ? batchController.allBatches.firstWhere((b) => b.uid == _selectedBatchUid)
+      : null;
+
+    final updatedStudent = widget.student.copyWith(
+      name: _nameController.text.trim(),
+      batchUid: _selectedBatchUid,
+      batchName: selectedBatch?.name,
+      classesPresent: int.tryParse(_classesPresentController.text),
+      classes: int.tryParse(_totalClassesController.text),
+    );
+
+    try {
+      await updateStudent(updatedStudent);
+      await studentController.refreshAllStudents();
+      studentController.selectStudent(updatedStudent);
+      
+      Get.back();
+    } catch (e) {
+      Get.snackbar(
+        "Update Failed",
+        "Could not save student details. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Edit Student", style: TextStyle(color: AppColors.frenchBlue)),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "Student Name",
+                  hintText: "Enter Student name",
+                ),
+                validator: (value) => (value == null || value.isEmpty) ? "Name cannot be empty" : null,
+              ),
+              const SizedBox(height: 16),
+              Obx(() => DropdownButtonFormField<String>(
+                value: _selectedBatchUid,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: "Batch",
+                  suffixIcon: batchController.isAllLoading.value 
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2,)) 
+                    : null,  
+                ),
+                items: batchController.allBatches.map((batch) {
+                  return DropdownMenuItem<String>(
+                    value: batch.uid,
+                    child: Text(batch.name, overflow: TextOverflow.ellipsis,),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBatchUid = value;
+                  });
+                },
+              )),
+              const SizedBox(height: 16),
+
+              Text("Classes Attended", style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _classesPresentController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: "Present"),
+                      validator: (value) => (int.tryParse(value ?? '') == null) ? "Invalid" : null,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text("/", style: TextStyle(fontSize: 24)),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _totalClassesController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: "Total"),
+                      validator: (value) => (int.tryParse(value ?? '') == null) ? "Invalid" : null,
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel', style: TextStyle(color: AppColors.frenchRed)),
+        ),
+        ElevatedButton(
+          onPressed: _onSave,
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.frenchBlue),
+          child: const Text("Save", style: TextStyle(color: AppColors.cardLight)),
+        )
+      ],
+    );
+  }
+}

@@ -85,10 +85,10 @@ packages:
     dependency: transitive
     description:
       name: cross_cache
-      sha256: "007d0340c19d4d201192a3335c4034f4b79eae5ea53f90b69eeb5d239d9fbd1d"
+      sha256: "56552222a6e797faf7536e8ae1d76e090b1a3d5894f4d4c91379e055bb060960"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   cross_file:
     dependency: transitive
     description:
@@ -178,10 +178,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_chat_core
-      sha256: bf70446d2adfe7a00a666cc11a6899f63034fa8ff83d4f539476a9d987c442c2
+      sha256: a1a609298f26e487ecff85a4dc031c3754aebd878f655da96111571cdc9c94cb
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.1"
+    version: "2.7.0"
   flutter_chat_types:
     dependency: "direct main"
     description:
@@ -194,10 +194,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_chat_ui
-      sha256: e327d787b48985500eec6246c0102436beca329dee6c20310e42467c49af9842
+      sha256: "313374988abb3549f4e36e3e1258de4a70c03f5a48f5aed4c1d9e3d817d7eacb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.2"
+    version: "2.7.0"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -218,10 +218,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_markdown
-      sha256: "04c4722cc36ec5af38acc38ece70d22d3c2123c61305d555750a091517bbe504"
+      sha256: "08fb8315236099ff8e90cb87bb2b935e0a724a3af1623000a9cec930468e0f27"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.23"
+    version: "0.7.7+1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -236,10 +236,10 @@ packages:
     dependency: transitive
     description:
       name: freezed_annotation
-      sha256: c87ff004c8aa6af2d531668b46a4ea379f7191dc6dfa066acd53d506da6e044b
+      sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.1.0"
   functions_client:
     dependency: transitive
     description:
@@ -713,10 +713,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher
-      sha256: "9d06212b1362abc2f0f0d78e6f09f726608c74e3b9462e8368bb03314aa8d603"
+      sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.1"
+    version: "6.3.2"
   url_launcher_android:
     dependency: transitive
     description:

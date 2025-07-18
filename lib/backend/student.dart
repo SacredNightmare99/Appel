@@ -10,7 +10,43 @@ class Student {
   final int classes;
   final int classesPresent;
 
-  const Student({required this.name, required this.uid, this.batchUid, this.batchName, this.classes = 0, this.classesPresent = 0});
+  const Student({
+    required this.name, 
+    required this.uid, 
+    this.batchUid, 
+    this.batchName, 
+    this.classes = 0, 
+    this.classesPresent = 0
+  });
+
+  Student copyWith({
+    String? name,
+    String? uid,
+    String? batchUid,
+    String? batchName,
+    int? classes,
+    int? classesPresent,
+  }) {
+    return Student(
+      name: name ?? this.name,
+      uid: uid ?? this.uid,
+      batchUid: batchUid ?? this.batchUid,
+      batchName: batchName ?? this.batchName,
+      classes: classes ?? this.classes,
+      classesPresent: classesPresent ?? this.classesPresent,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'uid': uid,
+      'batch_id': batchUid,
+      'batch_name': batchName,
+      'classes': classes,
+      'classes_present': classesPresent,
+    };
+  }
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
       name: map['name'],
@@ -31,6 +67,17 @@ Future<void> insertStudent(String name) async {
     await supabase.from('students').insert({'name': name});
   } catch (e) {
     throw Exception('Insert failed: $e');
+  }
+}
+
+Future<void> updateStudent(Student student) async {
+  final supabase = Supabase.instance.client;
+  try {
+    final updateData = student.toMap()..remove('uid');
+    
+    await supabase.from('students').update(updateData).eq('uid', student.uid);
+  } catch (e) {
+    throw Exception('Update failed: $e');
   }
 }
 
