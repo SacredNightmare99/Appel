@@ -79,11 +79,21 @@ class AttendanceController extends GetxController {
   }
 
   Future<void> deleteAttendanceRecord(Attendance attendanceToDelete, Student student) async {
+    final studentController = Get.find<StudentController>();
+
     try {
       await deleteAttendance(attendanceToDelete);
-
       await fetchAttendanceForStudent(student);
-      Get.find<StudentController>().refreshAllStudents();
+
+      if (studentController.selectedStudent.value != null) {  
+        int presentChange = attendanceToDelete.present ? -1 : 0;
+
+        studentController.selectedStudent.value = studentController.selectedStudent.value!.copyWith(
+          classes: studentController.selectedStudent.value!.classes - 1,
+          classesPresent: studentController.selectedStudent.value!.classesPresent + presentChange,
+        );
+      }
+    
     } catch (e) {
       Get.snackbar("Error", "Failed to delete attendance record.");
     }

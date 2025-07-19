@@ -400,10 +400,52 @@ class _StudentsPageState extends State<StudentsPage> {
                 topRight: Radius.circular(12)
               )
             ),
-            child: Center(
-              child: TitleText(
-                text: "Attendance",
-              ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                TitleText(
+                  text: "Attendance",
+                ),
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    tooltip: "Info",
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("How to Edit Attendance"),
+                          content: const SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: Icon(Icons.touch_app_outlined, color: AppColors.frenchBlue),
+                                  title: Text("Toggle Status"),
+                                  subtitle: Text("Double-tap an entry to switch between 'Present' and 'Absent'."),
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.back_hand_outlined, color: AppColors.frenchRed),
+                                  title: Text("Delete Record"),
+                                  subtitle: Text("Long-press an entry to permanently remove it."),
+                                ),
+                              ],
+                            ),
+                          ),
+                          actionsAlignment: MainAxisAlignment.center,
+                          actions: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text("GOT IT"),
+                            ),
+                          ],
+                        ),
+                      );
+                    }, 
+                    icon: Icon(Icons.info, color: AppColors.cardLight, size: 24,)
+                  ), 
+                )
+              ],
             ),
           ),
           selectedStudent == null ? 
@@ -488,6 +530,30 @@ class _AttendanceTile extends StatelessWidget {
 
   const _AttendanceTile({required this.attendance});
 
+  void _showDeleteConfirmation(BuildContext context, AttendanceController controller, Student student) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Confirm Delete", style: TextStyle(color: AppColors.frenchRed)),
+        content: Text("Are you sure you want to delete the attendance record for ${AppHelper.formatDate(attendance.date)}?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel", style: TextStyle(color: AppColors.frenchBlue)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back(); // Close dialog first
+              await controller.deleteAttendanceRecord(attendance, student);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.frenchRed),
+            child: const Text("Delete", style: TextStyle(color: AppColors.cardLight)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -505,6 +571,7 @@ class _AttendanceTile extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
           onDoubleTap: () => attendanceController.toggleAttendanceStatus(attendance, selectedStudent),
+          onLongPress: () => _showDeleteConfirmation(context, attendanceController, selectedStudent),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
