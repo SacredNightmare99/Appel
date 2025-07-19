@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:the_project/backend/student.dart';
 
@@ -114,7 +115,7 @@ Future<Map<String, dynamic>?> getAttendanceStatus(DateTime date, Student student
         .maybeSingle();
     return result;
   } catch (e) {
-    print('Error fetching attendance: $e');
+    debugPrint('Error fetching attendance: $e');
     return null;
   }
 }

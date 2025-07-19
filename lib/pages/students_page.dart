@@ -530,6 +530,33 @@ class _AttendanceTile extends StatelessWidget {
 
   const _AttendanceTile({required this.attendance});
 
+  void _showToggleConfirmation(BuildContext context, AttendanceController controller, Student student) {
+    // Determine the current and new status for the dialog message
+    final currentStatus = attendance.present ? "Present" : "Absent";
+    final newStatus = attendance.present ? "Absent" : "Present";
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Status Change"),
+        content: Text("Change attendance status from '$currentStatus' to '$newStatus'?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back(); // Close the dialog first
+              await controller.toggleAttendanceStatus(attendance, student);
+            },
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showDeleteConfirmation(BuildContext context, AttendanceController controller, Student student) {
     showDialog(
       context: context,
@@ -570,7 +597,7 @@ class _AttendanceTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
-          onDoubleTap: () => attendanceController.toggleAttendanceStatus(attendance, selectedStudent),
+          onDoubleTap: () => _showToggleConfirmation(context, attendanceController, selectedStudent),
           onLongPress: () => _showDeleteConfirmation(context, attendanceController, selectedStudent),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
