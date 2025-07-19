@@ -9,6 +9,7 @@ import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
+import 'package:the_project/widgets/custom_snackbar.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
 import 'package:the_project/widgets/responsive_layout.dart';
@@ -364,11 +365,27 @@ class _BatchesPageState extends State<BatchesPage> {
                     child: IconButton(
                       onPressed: () => _removeBatch(selectedBatch),
                       icon: const Icon(Icons.delete_forever),
-                      color: AppColors.frenchRed, // French Red
+                      color: AppColors.frenchRed,
                       iconSize: 24,
                       tooltip: "Remove Batch",
                     ),
                   ),
+                if (selectedBatch != null)
+                  Positioned(
+                    left: 0,
+                    child: IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context, 
+                          builder: (context) => _EditBatchDialog(batch: selectedBatch)
+                        );
+                      }, 
+                      icon: const Icon(Icons.edit),
+                      color: AppColors.frenchRed,
+                      iconSize: 24,
+                      tooltip: "Edit Batch",
+                    ),
+                  )
               ],
             ),
           ),
@@ -643,11 +660,12 @@ class _AddBatchDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              TextFormField(
                 controller: nameController,
                 decoration: const InputDecoration(
                   labelText: "Batch Name",
                 ),
+                validator: (v) => (v == null || v.isEmpty)? "Name is required" : null,
               ),
               const SizedBox(height: 12),
               Row(
@@ -759,6 +777,7 @@ class _AddBatchDialog extends StatelessWidget {
                   );
                 }).toList(),
               ),
+            
             ],
           ),
         ),
@@ -781,18 +800,9 @@ class _AddBatchDialog extends StatelessWidget {
               final newEndMinutes = endTime!.hour * 60 + endTime!.minute;
 
               if (newEndMinutes <= newStartMinutes) {
-                Get.snackbar(
+                CustomSnackbar.showError(
                   "Invalid Time",
                   "End time must be after start time",
-                  backgroundColor: AppColors.tileBackground,
-                  colorText: AppColors.text,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  borderRadius: 12,
-                  padding: const EdgeInsets.all(16),
-                  icon: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
-                  shouldIconPulse: false,
-                  duration: const Duration(seconds: 3),
                 );
 
                 return;
@@ -810,18 +820,9 @@ class _AddBatchDialog extends StatelessWidget {
               });
 
               if (isConflict) {
-                Get.snackbar(
+                CustomSnackbar.showError(
                   "Conflict", 
                   "Another batch already exists in this time range",
-                  backgroundColor: AppColors.tileBackground,
-                  colorText: AppColors.text,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  borderRadius: 12,
-                  padding: const EdgeInsets.all(16),
-                  icon: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
-                  shouldIconPulse: false,
-                  duration: const Duration(seconds: 3),
                 );
                 return;
               }
@@ -853,3 +854,184 @@ class _AddBatchDialog extends StatelessWidget {
   }
 }
 
+class _EditBatchDialog extends StatefulWidget {
+  final Batch batch;
+  const _EditBatchDialog({required this.batch});
+
+  @override
+  State<_EditBatchDialog> createState() => _EditBatchDialogState();
+}
+
+class _EditBatchDialogState extends State<_EditBatchDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final batchController = Get.find<BatchController>();
+
+  late TextEditingController _nameController;
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
+  String? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill the form with the existing batch data
+    _nameController = TextEditingController(text: widget.batch.name);
+    _startTime = widget.batch.startTime;
+    _endTime = widget.batch.endTime;
+    _selectedDay = widget.batch.day;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onSave() async {
+    if (!_formKey.currentState!.validate() || _startTime == null || _endTime == null || _selectedDay == null) {
+      CustomSnackbar.showError("Missing Info", "Please fill all fields.");
+      return;
+    }
+    
+    final newStartMinutes = _startTime!.hour * 60 + _startTime!.minute;
+    final newEndMinutes = _endTime!.hour * 60 + _endTime!.minute;
+
+    if (newEndMinutes <= newStartMinutes) {
+      CustomSnackbar.showError("Invalid Time", "End time must be after start time.");
+      return;
+    }
+
+    final isConflict = batchController.allBatches
+      .where((b) => b.day == _selectedDay && b.uid != widget.batch.uid)
+      .any((b) {
+        final existingStart = b.startTime.hour * 60 + b.startTime.minute;
+        final existingEnd = b.endTime.hour * 60 + b.endTime.minute;
+        return !(newEndMinutes <= existingStart || newStartMinutes >= existingEnd);
+      });
+
+    if (isConflict) {
+      CustomSnackbar.showError("Conflict", "Another batch already exists in this time range.");
+      return;
+    }
+    
+    final updatedBatch = widget.batch.copyWith(
+      name: _nameController.text.trim(),
+      startTime: _startTime,
+      endTime: _endTime,
+      day: _selectedDay,
+    );
+
+    try {
+      await updateBatch(updatedBatch);
+      await batchController.refreshAllBatches();
+      batchController.selectBatch(updatedBatch);
+      Get.back();
+    } catch (e) {
+      CustomSnackbar.showError(
+        "Error", 
+        "Failed to update the batch. Please try again."
+      );
+    }
+  }
+  
+  // Helper to show the time picker with your app's theme
+  Future<TimeOfDay?> _pickTime(TimeOfDay initialTime) {
+    return showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: AppColors.background,
+              dialHandColor: AppColors.frenchBlue,
+              dialBackgroundColor: AppColors.cardLight,
+              hourMinuteTextColor: AppColors.frenchBlue,
+              hourMinuteColor: AppColors.cardLight,
+              entryModeIconColor: Colors.white,
+              dayPeriodColor: AppColors.frenchBlue,
+              dayPeriodTextColor: Colors.white,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: AppColors.frenchBlue),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Edit Batch"),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: "Batch Name"),
+                validator: (value) => (value == null || value.isEmpty) ? "Name is required" : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.access_time, color: AppColors.frenchBlue),
+                      label: Text(_startTime == null ? "Start Time" : _startTime!.format(context), style: TextStyle(color: AppColors.frenchBlue)),
+                      onPressed: () async {
+                        final picked = await _pickTime(_startTime ?? TimeOfDay.now());
+                        if (picked != null) {
+                          setState(() => _startTime = picked);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.access_time_filled, color: AppColors.frenchBlue),
+                      label: Text(_endTime == null ? "End Time" : _endTime!.format(context), style: TextStyle(color: AppColors.frenchBlue)),
+                      onPressed: () async {
+                        final picked = await _pickTime(_endTime ?? TimeOfDay.now());
+                        if (picked != null) {
+                          setState(() => _endTime = picked);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: "Day of the Week"),
+                value: _selectedDay,
+                onChanged: (value) => setState(() => _selectedDay = value),
+                items: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                    .map((day) => DropdownMenuItem(value: day, child: Text(day)))
+                    .toList(),
+                validator: (value) => value == null ? "Please select a day" : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel', style: TextStyle(color: AppColors.frenchRed)),
+        ),
+        ElevatedButton(
+          onPressed: _onSave,
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.frenchBlue),
+          child: const Text("Save", style: TextStyle(color: AppColors.cardLight)),
+        ),
+      ],
+    );
+  }
+}

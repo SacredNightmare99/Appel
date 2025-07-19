@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:the_project/backend/attendance.dart';
 import 'package:the_project/backend/student.dart';
 import 'package:the_project/controllers/student_controller.dart';
+import 'package:the_project/widgets/custom_snackbar.dart';
 
 class AttendanceController extends GetxController {
   final Rxn<DateTime> selectedDate = Rxn<DateTime>();
@@ -74,7 +75,7 @@ class AttendanceController extends GetxController {
       }
 
     } catch (e) {
-      Get.snackbar("Error", "Failed to update attendance status.");
+      CustomSnackbar.showError("Error", "Failed to update attendance status.");
     }
   }
 
@@ -95,7 +96,7 @@ class AttendanceController extends GetxController {
       }
     
     } catch (e) {
-      Get.snackbar("Error", "Failed to delete attendance record.");
+      CustomSnackbar.showError("Error", "Failed to delete attendance record.");
     }
   }
 

@@ -9,6 +9,7 @@ import 'package:the_project/utils/colors.dart';
 import 'package:the_project/utils/helpers.dart';
 import 'package:the_project/widgets/cards.dart';
 import 'package:the_project/widgets/custom_buttons.dart';
+import 'package:the_project/widgets/custom_snackbar.dart';
 import 'package:the_project/widgets/custom_text.dart';
 import 'package:the_project/widgets/headers.dart';
 import 'package:the_project/widgets/responsive_layout.dart';
@@ -442,7 +443,9 @@ class _StudentsPageState extends State<StudentsPage> {
                         ),
                       );
                     }, 
-                    icon: Icon(Icons.info, color: AppColors.cardLight, size: 24,)
+                    icon: const Icon(Icons.info),
+                    color: AppColors.cardLight,
+                    iconSize: 24,
                   ), 
                 )
               ],
@@ -733,12 +736,9 @@ class _EditStudentDialogState extends State<_EditStudentDialog> {
       
       Get.back();
     } catch (e) {
-      Get.snackbar(
+      CustomSnackbar.showError(
         "Update Failed",
-        "Could not save student details. Please try again.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
+        "Could not save student details. Please try again."
       );
     }
   }

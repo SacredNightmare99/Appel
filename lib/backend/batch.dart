@@ -10,8 +10,40 @@ class Batch {
 
   const Batch({required this.name, required this.uid, required this.day, required this.endTime, required this.startTime});
 
-  factory Batch.fromMap(Map<String, dynamic> map) {
+  Batch copyWith({
+    String? name,
+    String? uid,
+    String? day,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  }) {
+    return Batch(
+      name: name ?? this.name,
+      uid: uid ?? this.uid,
+      day: day ?? this.day,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+    );
+  }
 
+  // Helper to format TimeOfDay for Supabase
+  static String _formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'batch_uid': uid,
+      'day': day,
+      'start_time': _formatTime(startTime),
+      'end_time': _formatTime(endTime),
+    };
+  }
+
+  factory Batch.fromMap(Map<String, dynamic> map) {
     TimeOfDay parseTime(String timeStr) {
       final parts = timeStr.split(":");
       return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
@@ -27,6 +59,8 @@ class Batch {
   }
 
 }
+
+// --- Supabase Functions ---
 
 Future<void> insertBatch({
   required String name,
@@ -53,6 +87,21 @@ Future<void> insertBatch({
   } catch (e) {
     debugPrint('Batch Insert failed: $e');
     throw Exception('Insert failed: $e');
+  }
+}
+
+Future<void> updateBatch(Batch batch) async {
+  final supabase = Supabase.instance.client;
+  try {
+    final updateData = batch.toMap()..remove('batch_uid');
+    
+    await supabase
+        .from('batches')
+        .update(updateData)
+        .eq('batch_uid', batch.uid);
+  } catch (e) {
+    debugPrint('Batch Update failed: $e');
+    throw Exception('Update failed: $e');
   }
 }
 
