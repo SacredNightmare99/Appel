@@ -41,6 +41,7 @@ To get a local copy up and running, follow these simple steps.
 
 * Flutter SDK installed.
 * A Supabase account and project.
+* A Google AI API key for Gemini.
 
 ### Installation
 
@@ -58,15 +59,30 @@ To get a local copy up and running, follow these simple steps.
     ```
 4.  **Set up your environment variables**
     * Create a `.env` file in the root directory.
-    * Add your Supabase URL and Anon Key:
+    * Add your Supabase and Gemini credentials:
         ```env
-        SUPABASE_URL=YOUR_SUPABASE_URL
-        SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+        SupabaseURL=YOUR_SUPABASE_URL
+        SupabaseAPI=YOUR_SUPABASE_ANON_KEY
+        GeminiAPI=YOUR_GEMINI_API_KEY
         ```
 5.  **Run the app**
     ```sh
     flutter run -d chrome
     ```
+
+---
+## 📂 Project Structure
+
+The project follows a standard Flutter structure. The core logic is organized within the `lib` directory:
+
+-   `lib/`
+    -   `main.dart`: The entry point of the application.
+    -   `AI/`: Contains the Gemini-powered AI assistant logic.
+    -   `backend/`: Data models and Supabase service interactions.
+    -   `controllers/`: GetX controllers for state management.
+    -   `pages/`: UI screens for different features.
+    -   `utils/`: Helper functions, color constants, and image paths.
+    -   `widgets/`: Reusable UI components used across the app.
 
 ---
 ## 🏛️ Database Structure
@@ -90,24 +106,34 @@ The backend is built on three core tables and two SQL functions to handle atomic
     * Atomically decrements the total `classes` and, if `was_present` is true, also decrements `classes_present`. Used when an attendance record is deleted.
 
 ---
-## 🚧 Work in Progress & Planned Features
+## 🚀 Future Roadmap
 
-* 🔐 **Authentication System**
-    * Secure login.
-      
-* 🤖 **AI Assistant (Gemini-Powered)**
-    * **Current:** Query student and batch information using natural language (e.g., "Show me students with less than 75% attendance").
-    * **Planned:** Get smart insights and generate reports.
+My vision for Appel extends beyond its current capabilities. Here are some of the key features and improvements on my roadmap:
 
-* 📊 **Dashboard & Analytics**
-    * A visual dashboard with charts for attendance trends, batch performance, and overall student engagement.
+*   🔐 **Multi-Tenant Authentication**
+    *   Implement a robust user registration and login system.
+    *   Allow multiple users (educators, institutions) to create and manage their own private sets of students, batches, and attendance data.
+
+*   🤖 **Enhanced AI Assistant**
+    *   Move beyond simple queries to proactive insights and report generation.
+    *   Enable the AI to identify at-risk students based on attendance trends.
+
+*   📊 **Advanced Analytics Dashboard**
+    *   Develop a comprehensive dashboard with visual charts for:
+        *   Attendance trends over time.
+        *   Batch performance comparisons.
+        *   Overall student engagement metrics.
+
+*   ☁️ **Cloud Deployment & Hosting**
+    *   Provide a fully hosted version of the application, removing the need for users to self-deploy.
 
 ---
-## 🤝 Contributing
+## 🤝 Contributing & Feedback
 
-Contributions, feedback, and suggestions are always welcome. Feel free to open an issue or submit a pull request.
+As a solo developer, I welcome any feedback, suggestions, or contributions from the community. If you have ideas for improvement or want to report a bug, please feel free to open an issue. Pull requests are also appreciated!
 
 ---
 ## 📄 License
 
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+This project is licensed under the **MIT License**.
+
