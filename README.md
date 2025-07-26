@@ -1,4 +1,4 @@
-# 📘 Appel
+# Appel
 
 [![Made with Flutter](https://img.shields.io/badge/Made%20with-Flutter-blue)](https://flutter.dev/)
 [![Powered by Supabase](https://img.shields.io/badge/Backend-Supabase-green)](https://supabase.com/)
@@ -47,11 +47,11 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repo**
     ```sh
-    git clone https://github.com/SacredNightmare99/Appel-Attendance-Management-.git
+    git clone https://github.com/SacredNightmare99/Appel.git
     ```
 2.  **Navigate to the project directory**
     ```sh
-    cd Appel-Attendance-Management-
+    cd Appel
     ```
 3.  **Install dependencies**
     ```sh
