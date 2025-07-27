@@ -27,3 +27,29 @@ class AddButton extends StatelessWidget {
     );
   }
 }
+
+class LoginButton extends StatelessWidget {
+  final void Function()? onPressed;
+  const LoginButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Tooltip(
+        message: "Login",
+        child: MaterialButton(
+          onPressed: onPressed,
+          color: AppColors.frenchBlue,
+          hoverColor: AppColors.frenchBlueAccent,
+          textColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)
+          ),
+          elevation: 1,
+          child: const Text("Login"),
+        ),
+      ),
+    );
+  }
+}

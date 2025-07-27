@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
             children: [
-              // Use a ConstrainedBox for better readability on wide screens
+              // ConstrainedBox for better readability on wide screens
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 500),
                 child: Column(

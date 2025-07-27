@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:the_project/backend/batch.dart';
-import 'package:the_project/backend/student.dart';
+import 'package:the_project/backend/app/batch.dart';
+import 'package:the_project/backend/app/student.dart';
 import 'package:the_project/controllers/batch_controller.dart';
 import 'package:the_project/controllers/student_controller.dart';
 import 'package:the_project/utils/colors.dart';

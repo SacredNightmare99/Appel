@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:the_project/backend/student.dart';
+import 'package:the_project/backend/app/student.dart';
 
 class StudentController extends GetxController {
   final Rxn<Student> selectedStudent = Rxn<Student>();

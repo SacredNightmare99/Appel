@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:the_project/backend/student.dart';
+import 'package:the_project/backend/app/student.dart';
 
 class Attendance {
   final int uid;

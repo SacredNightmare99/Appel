@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:the_project/backend/attendance.dart';
-import 'package:the_project/backend/student.dart';
+import 'package:the_project/backend/app/attendance.dart';
+import 'package:the_project/backend/app/student.dart';
 import 'package:the_project/controllers/student_controller.dart';
 import 'package:the_project/widgets/custom_snackbar.dart';
 

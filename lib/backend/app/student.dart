@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:the_project/backend/batch.dart';
+import 'package:the_project/backend/app/batch.dart';
 
 class Student {
   final String name;
